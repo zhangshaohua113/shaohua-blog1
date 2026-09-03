@@ -39,7 +39,7 @@ if (-not (Test-Path $worktree)) {
     if ($LASTEXITCODE -ne 0) { Write-Host 'FAILED: worktree (gh-pages branch missing?)'; exit 1 }
     Write-Host "  worktree ready: $worktree"
 }
-robocopy $pagesBuild $worktree /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy $pagesBuild $worktree /MIR /XF .git /XD .git /NFL /NDL /NJH /NJS /NP | Out-Null
 Set-Location $worktree
 git add -A 2>&1 | Out-Null; $null = $LASTEXITCODE
 $changed2 = git status --porcelain

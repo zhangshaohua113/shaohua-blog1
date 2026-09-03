@@ -34,12 +34,20 @@ Write-Host '=== [2/3] rebuild pages version (relative links) ==='
 if ($LASTEXITCODE -ne 0) { Write-Host 'FAILED: pages build'; exit 1 }
 
 Write-Host '=== [3/3] sync into gh-pages worktree and push ==='
+if (Test-Path $worktree) {
+    if (-not (Test-Path (Join-Path $worktree '.git'))) {
+        Remove-Item $worktree -Recurse -Force
+        git worktree prune 2>&1 | Out-Null
+        Write-Host '  broken worktree removed, will recreate'
+    }
+}
 if (-not (Test-Path $worktree)) {
     git worktree add $worktree gh-pages 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Host 'FAILED: worktree (gh-pages branch missing?)'; exit 1 }
     Write-Host "  worktree ready: $worktree"
 }
 robocopy $pagesBuild $worktree /MIR /XF .git /XD .git /NFL /NDL /NJH /NJS /NP | Out-Null
+if (-not (Test-Path (Join-Path $worktree '.git'))) { Write-Host 'FAILED: worktree .git missing after sync'; exit 1 }
 Set-Location $worktree
 git add -A 2>&1 | Out-Null; $null = $LASTEXITCODE
 $changed2 = git status --porcelain

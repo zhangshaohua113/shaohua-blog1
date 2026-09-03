@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>温度传感器（LM75A，I2C 数字温度传感器） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/kb">← 返回知识库</a>
+  <a class="" href="#元信息">一、元信息</a><a class="" href="#接线表">二、接线表</a><a class="" href="#踩坑清单">三、踩坑清单</a><a class="" href="#驱动代码-demo00-工程-temp-c-核心逻辑-已通过验证">四、驱动代码（Demo00 工程 temp.c 核心逻辑，已通过验证）</a><a class="l2" href="#temp-h">4.1 temp.h</a><a class="l2" href="#temp-c">4.2 temp.c</a><a class="l2" href="#i2c_sw-c-读函数-软件-i2c-读寄存器">4.3 i2c_sw.c 读函数（软件 I2C 读寄存器）</a><a class="" href="#调用示例">五、调用示例</a><a class="" href="#参考库-链接">六、参考库/链接</a><a class="" href="#更新日志">七、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">stm32/sensor/lm75a-i2c-temp.md</div>
+    <h1 class="title">温度传感器（LM75A，I2C 数字温度传感器）</h1>
+    <div class="meta-chips">
+      <span class="chip kb-tag">知识库 · STM32</span>
+      <span class="chip">📅 初版 2026-08-19</span>
+      <span class="chip upd">✏️ 更新于 2026-09-03</span>
+    </div>
+    <div class="prose"><h1 id="温度传感器（LM75A，I2C-数字温度传感器）">温度传感器（LM75A，I2C 数字温度传感器）</h1>
+<blockquote><p>2026-08-19 实测验证：Demo00 工程（洋桃1号开发板）温度实时显示 + 历史曲线 + 数码管显示温度，均正常</p>
+</blockquote>
+<h2 id="元信息"><a class="anchor" href="#元信息">#</a><span class="sec-num">一、</span>元信息</h2>
+<table><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>芯片/平台</td><td>STM32F103C8T6（HAL + FreeRTOS）</td></tr><tr><td>接口类型</td><td>I2C（软件模拟，与 OLED 共用总线：SCL=PB6，SDA=PB7）</td></tr><tr><td>验证状态</td><td>✅ 已验证（2026-08-19）</td></tr><tr><td>验证环境</td><td>洋桃1号开发板 / STM32CubeIDE 2.2.0 / OpenOCD / 2026-08-19</td></tr><tr><td>驱动方式</td><td>软件 I2C 读寄存器（i2c_sw.c），12 位分辨率 0.0625℃/LSB</td></tr></tbody></table>
+<h2 id="接线表"><a class="anchor" href="#接线表">#</a><span class="sec-num">二、</span>接线表</h2>
+<table><thead><tr><th>信号</th><th>MCU 引脚</th><th>模块引脚</th><th>备注</th></tr></thead><tbody><tr><td>I2C_SCL</td><td>PB6</td><td>LM75A SCL（SCK）</td><td>需上拉（模块自带则免）</td></tr><tr><td>I2C_SDA</td><td>PB7</td><td>LM75A SDA（SDA）</td><td>需上拉（模块自带则免）</td></tr><tr><td>A0/A1/A2</td><td>接地或 VCC</td><td>LM75A 地址选择</td><td>地址位，见下方地址计算</td></tr><tr><td>VCC</td><td>3.3V</td><td>LM75A VCC</td><td>2.8~5.5V（3.3V 标准）</td></tr><tr><td>GND</td><td>GND</td><td>LM75A GND</td><td>必须共地</td></tr></tbody></table>
+<h2 id="踩坑清单"><a class="anchor" href="#踩坑清单">#</a><span class="sec-num">三、</span>踩坑清单</h2>
+<ol><li><strong>芯片型号确认：LM75A 不是 DHT11！</strong> 本板温度传感器是 LM75A（I2C 数字传感器），不是单总线 DHT11。DHT11 是单总线协议（单根数据线），LM75A 是标准 I2C，接线和协议完全不同，勿混用。</li><li><strong>地址计算</strong>：LM75A 的 7 位地址 = 0x48 + A2A1A0（默认全接地时 0x48）。本板实测地址为 0x4F（A2/A1/A0 接 1 的高地址配置）。写入时传 7 位地址（左移 1 位即 8 位地址 0x9E）。可用 I2C 地址扫描遍历 0x48~0x4F 用 ACK 确认。</li><li><strong>温度寄存器</strong>：温度值存于寄存器 0x00（2 字节，高字节在前），12 位有效位（上 12 位，低 4 位是符号扩展/小数位）。读取后原始值右移 4 位，LSB=0.0625℃。转换公式：<code>温度 = 原始值 &gt;&gt; 4 × 0.0625℃</code>。要保留两位小数：<code>摄氏度×100 = 原始值 &gt;&gt; 4 × 6.25</code>（本工程用 <code>(int32_t)raw * 625 / 100</code> 得 0.01℃ 精度）。</li><li><strong>分辨率设置</strong>：寄存器 0x01 的 bit7:5 可设分辨率（00=9bit/0.5℃、01=10bit/0.25℃、10=11bit/0.125℃、11=12bit/0.0625℃）。本工程设 12bit（写入 0x03）获得最高精度。</li><li><strong>I2C 总线共用互斥锁</strong>：OLED(0x3C) 与 LM75A(0x4F) 共用同一软件 I2C 总线，多任务访问需互斥锁保护，否则温度采样与屏幕刷新争抢总线会造成画面卡顿/读数异常。</li></ol>
+<h2 id="驱动代码-demo00-工程-temp-c-核心逻辑-已通过验证"><a class="anchor" href="#驱动代码-demo00-工程-temp-c-核心逻辑-已通过验证">#</a><span class="sec-num">四、</span>驱动代码（Demo00 工程 temp.c 核心逻辑，已通过验证）</h2>
+<h3 id="temp-h"><a class="anchor" href="#temp-h">#</a><span class="sec-num">4.1 </span>temp.h</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#ifndef TEMP_H
+#define TEMP_H
+
+#include &quot;main.h&quot;
+
+void temp_init(void);
+int16_t temp_read_celsius_tenths(void);   /* 返回 0.01℃ 精度，失败返回 0x7FFF */
+
+#endif</code></pre>
+<h3 id="temp-c"><a class="anchor" href="#temp-c">#</a><span class="sec-num">4.2 </span>temp.c</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &quot;temp.h&quot;
+#include &quot;i2c_sw.h&quot;
+
+#define LM75A_ADDR  0x4F  /* 7-bit 地址，0x9E &gt;&gt; 1（A2/A1/A0 高位配置） */
+#define LM75A_REG_TEMP 0x00
+#define LM75A_REG_CONF 0x01
+
+void temp_init(void)
+{
+  /* 设 12 位分辨率（0x03）→ 0.0625℃/LSB，两位小数精度 */
+  uint8_t reg = LM75A_REG_CONF;
+  uint8_t conf = 0x03;
+  i2c_sw_write(LM75A_ADDR, &amp;reg, 1);
+  i2c_sw_write(LM75A_ADDR, &amp;conf, 1);
+}
+
+int16_t temp_read_celsius_tenths(void)
+{
+  uint8_t buf[2] = {0, 0};
+  if (i2c_sw_read(LM75A_ADDR, LM75A_REG_TEMP, buf, 2) != 0)
+  {
+    return 0x7FFF;   /* 读取失败标记 */
+  }
+  int16_t raw = ((int16_t)buf[0] &lt;&lt; 8) | buf[1];
+  raw &gt;&gt;= 4;  /* 12-bit 数值，右移去低 4 位 */
+  int16_t cents = (int16_t)(((int32_t)raw * 625) / 100);
+  return cents;   /* 0.01℃ 精度 */
+}</code></pre>
+<h3 id="i2c_sw-c-读函数-软件-i2c-读寄存器"><a class="anchor" href="#i2c_sw-c-读函数-软件-i2c-读寄存器">#</a><span class="sec-num">4.3 </span>i2c_sw.c 读函数（软件 I2C 读寄存器）</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">uint8_t i2c_sw_read(uint8_t dev_addr, uint8_t reg, uint8_t *buf, uint8_t len)
+{
+  /* 写寄存器地址 → 重复起始 → 读数据：完整时序见工程 i2c_sw.c */
+  /* 伪码：start() → 写(dev_addr&lt;&lt;1) → 等ACK → 写(reg) → 等ACK → start() → 写((dev_addr&lt;&lt;1)|1) → 读len字节 → stop() */
+}</code></pre>
+<h2 id="调用示例"><a class="anchor" href="#调用示例">#</a><span class="sec-num">五、</span>调用示例</h2>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+HAL_Init();
+SystemClock_Config();
+i2c_sw_init();   /* 软件 I2C 引脚初始化 PB6/PB7 */
+temp_init();     /* LM75A 配置为 12 位分辨率 */
+
+/* 读取温度（每秒采样一次） */
+int16_t t = temp_read_celsius_tenths();   /* 如 2531 = 25.31℃ */
+if (t != 0x7FFF)
+{
+  char buf[16];
+  snprintf(buf, sizeof(buf), &quot;%d.%02d C&quot;, t / 100, t % 100);  /* 显示 25.31 C */
+}</code></pre>
+<h2 id="参考库-链接"><a class="anchor" href="#参考库-链接">#</a><span class="sec-num">六、</span>参考库/链接</h2>
+<ul><li>LM75A 数据手册：搜索 &quot;LM75A datasheet PDF&quot;（NXP/恩智浦 LM75A 数字温度传感器）</li><li>洋桃1号官方例程：<code>D:\学习资料\【用户资料】洋桃1号开发板(2)\B5-教学视频示例程序\</code>（温度传感器示例可参考）</li><li>软件 I2C 驱动：本工程 <code>Core/Src/app/i2c_sw.c</code> / <code>i2c_sw.h</code>（SCL=PB6/SDA=PB7）</li></ul>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">七、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-19</td><td><span class="ty ty-add">新增</span></td><td>首次建档</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（建档补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/kb">← 返回知识库</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

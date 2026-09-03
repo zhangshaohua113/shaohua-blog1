@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OLED 屏幕（SH1106，I2C 128x64） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/kb">← 返回知识库</a>
+  <a class="" href="#元信息">一、元信息</a><a class="" href="#接线表">二、接线表</a><a class="" href="#踩坑清单">三、踩坑清单</a><a class="" href="#驱动代码-demo00-工程-oled-c-核心逻辑-已通过验证">四、驱动代码（Demo00 工程 oled.c 核心逻辑，已通过验证）</a><a class="l2" href="#oled-h">4.1 oled.h</a><a class="l2" href="#oled-c-初始化与关键函数">4.2 oled.c 初始化与关键函数</a><a class="" href="#调用示例">五、调用示例</a><a class="" href="#参考库-链接">六、参考库/链接</a><a class="" href="#更新日志">七、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">stm32/display/oled-sh1106.md</div>
+    <h1 class="title">OLED 屏幕（SH1106，I2C 128x64）</h1>
+    <div class="meta-chips">
+      <span class="chip kb-tag">知识库 · STM32</span>
+      <span class="chip">📅 初版 2026-08-19</span>
+      <span class="chip upd">✏️ 更新于 2026-09-03</span>
+    </div>
+    <div class="prose"><h1 id="OLED-屏幕（SH1106，I2C-128x64）">OLED 屏幕（SH1106，I2C 128x64）</h1>
+<blockquote><p>2026-08-19 实测验证：Demo00 工程（洋桃1号开发板 + STM32F103C8T6 + 软件 I2C）菜单/开机画面/动画全部正常显示</p>
+</blockquote>
+<h2 id="元信息"><a class="anchor" href="#元信息">#</a><span class="sec-num">一、</span>元信息</h2>
+<table><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>芯片/平台</td><td>STM32F103C8T6（HAL + FreeRTOS）</td></tr><tr><td>接口类型</td><td>I2C（软件模拟，SCL=PB6，SDA=PB7）</td></tr><tr><td>验证状态</td><td>✅ 已验证（2026-08-19）</td></tr><tr><td>验证环境</td><td>洋桃1号开发板 / STM32CubeIDE 2.2.0 / OpenOCD / 2026-08-19</td></tr><tr><td>驱动方式</td><td>软件 I2C（i2c_sw.c）+ SH1106 命令序列</td></tr></tbody></table>
+<h2 id="接线表"><a class="anchor" href="#接线表">#</a><span class="sec-num">二、</span>接线表</h2>
+<table><thead><tr><th>信号</th><th>MCU 引脚</th><th>模块引脚</th><th>备注</th></tr></thead><tbody><tr><td>I2C_SCL</td><td>PB6</td><td>OLED SCL（SCK）</td><td>需上拉（模块自带则免）</td></tr><tr><td>I2C_SDA</td><td>PB7</td><td>OLED SDA（DIN）</td><td>需上拉（模块自带则免）</td></tr><tr><td>VCC</td><td>3.3V</td><td>OLED VCC</td><td>3.3V（勿接 5V）</td></tr><tr><td>GND</td><td>GND</td><td>OLED GND</td><td>必须共地</td></tr></tbody></table>
+<h2 id="踩坑清单"><a class="anchor" href="#踩坑清单">#</a><span class="sec-num">三、</span>踩坑清单</h2>
+<ol><li><strong>芯片型号确认：SH1106 不是 SSD1306！</strong> 本板 OLED 是 SH1106（内部 132 列，128x64 模块从列 2 起始），与 SSD1306 初始化命令基本兼容但列偏移不同。驱动必须设 <code>SH1106_COL_OFFSET 2</code>，否则画面整体左移 2 列、右侧有残影。</li><li><strong>I2C 地址</strong>：7 位地址 <code>0x3C</code>（SA0 接地）或 <code>0x3D</code>（SA0 接 VCC）。写入时按 7 位处理（左移 1 位即 0x78 8 位地址）。可写地址扫描遍历 0x00~0x7F 用 ACK 确认实际地址。</li><li><strong>必须发完整初始化序列</strong>：SH1106 需要完整命令序列（关显示→设置显示参数→Charge Pump 开启 0x8D 0x14→开显示）。漏掉 Charge Pump 时 I2C 正常但不亮。</li><li><strong>页式寻址：bit0=顶、1=白</strong>：SH1106 内存是页式（8 行一页，共 8 页 × 128 列），数据字节 bit0 对应每页最顶像素。取模软件输出的位图可能反相（1=黑）需翻转。</li><li><strong>软件 I2C 时序</strong>：SCL/SDA 用推挽输出或开漏+上拉，写数据前设输出、读 ACK 前切输入，延时循环要够（本工程 <code>i2c_delay</code> 20 次空操作，约满足 100kHz）。杜邦线过长需降速。</li><li><strong>I2C 总线共挂多设备</strong>：本工程 OLED(0x3C) 与 LM75A(0x4F) 共用同一软件 I2C 总线，多任务访问需互斥锁保护，避免争抢总线造成花屏/丢帧。</li></ol>
+<h2 id="驱动代码-demo00-工程-oled-c-核心逻辑-已通过验证"><a class="anchor" href="#驱动代码-demo00-工程-oled-c-核心逻辑-已通过验证">#</a><span class="sec-num">四、</span>驱动代码（Demo00 工程 oled.c 核心逻辑，已通过验证）</h2>
+<h3 id="oled-h"><a class="anchor" href="#oled-h">#</a><span class="sec-num">4.1 </span>oled.h</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#ifndef OLED_DRV_H
+#define OLED_DRV_H
+
+#include &quot;main.h&quot;
+
+#define OLED_W 128
+#define OLED_H 64
+#define OLED_PAGES (OLED_H / 8)
+
+#define OLED_ADDR 0x3C          /* 7 位地址，SA0 接地 */
+#define OLED_ADDR_ALT 0x3D      /* SA0 接 VCC 时的备用地址 */
+
+/* SH1106 内部 132 列，128x64 模块从列 2 起始，列偏移=2 */
+#define SH1106_COL_OFFSET 2
+
+void oled_init(void);
+void oled_clear(void);
+void oled_update(void);
+void oled_draw_bmp(uint8_t x, uint8_t y, const uint8_t *data);
+void oled_draw_string8x16(uint8_t x, uint8_t y, const char *str);
+void oled_draw_cn_string(uint8_t x, uint8_t y, const char *str);
+
+#endif</code></pre>
+<h3 id="oled-c-初始化与关键函数"><a class="anchor" href="#oled-c-初始化与关键函数">#</a><span class="sec-num">4.2 </span>oled.c 初始化与关键函数</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &quot;oled.h&quot;
+#include &quot;i2c_sw.h&quot;
+
+static uint8_t oled_fb[OLED_W * OLED_PAGES];  /* 128x64 帧缓冲 */
+
+static void oled_cmd(uint8_t cmd)
+{
+  uint8_t d[2] = { 0x00, cmd };   /* 0x00 = 命令模式控制字节 */
+  i2c_sw_write(OLED_ADDR, d, 2);
+}
+
+void oled_init(void)
+{
+  oled_cmd(0xAE);      /* 关显示 */
+  oled_cmd(0xD5); oled_cmd(0x80);  /* 时钟分频 */
+  oled_cmd(0xA8); oled_cmd(0x3F);  /* 复用率 64 */
+  oled_cmd(0xD3); oled_cmd(0x00);  /* 显示偏移 */
+  oled_cmd(0x40);                  /* 起始行 0 */
+  oled_cmd(0x8D); oled_cmd(0x14);  /* Charge Pump 开启（关键） */
+  oled_cmd(0xA1);                  /* 段重映射（列地址 127→0） */
+  oled_cmd(0xC8);                  /* 扫描方向 */
+  oled_cmd(0xDA); oled_cmd(0x12);  /* COM 配置 */
+  oled_cmd(0x81); oled_cmd(0xCF);  /* 对比度 */
+  oled_cmd(0xAF);                  /* 开显示 */
+  oled_clear();
+  oled_update();
+}
+
+void oled_clear(void)
+{
+  memset(oled_fb, 0, sizeof(oled_fb));
+}
+
+void oled_update(void)
+{
+  for (uint8_t page = 0; page &lt; OLED_PAGES; page++)
+  {
+    oled_cmd(0xB0 + page);                 /* 选页 */
+    oled_cmd(0x00 + SH1106_COL_OFFSET);    /* 列低 4 位 */
+    oled_cmd(0x10);                        /* 列高 4 位（0x10=列 0 区域，配合偏移 2 覆盖 0..127） */
+    i2c_sw_write(OLED_ADDR, &amp;oled_fb[page * OLED_W], 128);
+  }
+}
+
+/* 按页式布局绘制位图（data 为 1024 字节，页式、bit0=顶、1=白） */
+void oled_draw_bmp(uint8_t x, uint8_t y, const uint8_t *data)
+{
+  for (uint8_t page = 0; page &lt; OLED_PAGES; page++)
+  {
+    for (uint8_t col = 0; col &lt; OLED_W; col++)
+    {
+      oled_fb[page * OLED_W + col] |= data[page * OLED_W + col];
+    }
+  }
+}</code></pre>
+<h2 id="调用示例"><a class="anchor" href="#调用示例">#</a><span class="sec-num">五、</span>调用示例</h2>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+HAL_Init();
+SystemClock_Config();
+i2c_sw_init();   /* 软件 I2C 引脚初始化 PB6/PB7 */
+oled_init();     /* SH1106 初始化 + 清屏 */
+
+/* 显示欢迎语（8x16 英文字符串） */
+oled_clear();
+oled_draw_string8x16(24, 20, &quot;Hello STM32&quot;);
+oled_update();</code></pre>
+<h2 id="参考库-链接"><a class="anchor" href="#参考库-链接">#</a><span class="sec-num">六、</span>参考库/链接</h2>
+<ul><li>洋桃1号官方 OLED 示例（本地）：<code>D:\学习资料\【用户资料】洋桃1号开发板(2)\B5-教学视频示例程序\1-2-21-OLED显示汉字和图片显示实验\</code>（SH1106 驱动参考）</li><li>SH1106 数据手册：搜索 &quot;SH1106 datasheet PDF&quot;（中景园/中显微电子的 128x64 模块常用）</li><li>通用单色屏库 U8g2：github.com/olikraus/u8g2（内置 SH1106 支持）</li><li>软件 I2C 驱动：本工程 <code>Core/Src/app/i2c_sw.c</code> / <code>i2c_sw.h</code>（SCL=PB6/SDA=PB7）</li></ul>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">七、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-19</td><td><span class="ty ty-add">新增</span></td><td>首次建档</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（建档补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/kb">← 返回知识库</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

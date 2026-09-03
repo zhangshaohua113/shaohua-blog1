@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npm 全局包救活记：opencode 崩溃 3 小时复盘 · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="on">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="" href="#症状清单">一、症状清单</a><a class="" href="#排查思路-三级递进">二、排查思路（三级递进）</a><a class="" href="#自愈命令速查">三、自愈命令速查</a><a class="" href="#防复发清单">四、防复发清单</a><a class="" href="#更新日志">五、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">posts/npm-broken-cli-fix.md</div>
+    <h1 class="title">npm 全局包救活记：opencode 崩溃 3 小时复盘</h1>
+    <div class="meta-chips">
+      <div class="dates">
+        <div class="dt"><span>📅 发布日期</span><b>2026-09-01</b></div>
+        <div class="dt up"><span>✏️ 更新日期</span><b>2026-09-03</b></div>
+      </div>
+      <span class="chip">工具链</span>
+      <span class="chip">4 分钟阅读</span>
+      <span class="chip">#npm</span><span class="chip">#opencode</span><span class="chip">#排障</span><span class="chip">#Windows</span>
+    </div>
+    <div class="prose"><h1 id="npm-全局包救活记：opencode-崩溃-3-小时复盘">npm 全局包救活记：opencode 崩溃 3 小时复盘</h1>
+<p>那天晚上 opencode 突然彻底罢工：终端里输入 <code>opencode</code> 提示&quot;无法识别&quot;，VSCode 扩展也拉起不了会话，直接运行可执行文件则报&quot;不是有效的应用程序&quot;。</p>
+<h2 id="症状清单"><a class="anchor" href="#症状清单">#</a><span class="sec-num">一、</span>症状清单</h2>
+<table><thead><tr><th>症状</th><th>直接原因</th></tr></thead><tbody><tr><td><code>opencode</code> 命令找不到</td><td>npm 全局目录里启动器（<code>opencode.cmd</code>）缺失</td></tr><tr><td>exe 被系统拒绝执行</td><td>二进制文件损坏，Windows 加载器直接拒绝</td></tr><tr><td>VSCode 扩展起不来</td><td>扩展通过终端执行 <code>opencode --port xxx</code>，依赖上面的命令</td></tr></tbody></table>
+<h2 id="排查思路-三级递进"><a class="anchor" href="#排查思路-三级递进">#</a><span class="sec-num">二、</span>排查思路（三级递进）</h2>
+<p><strong>第一级：看全貌。</strong> 先确认&quot;该装的装了没&quot;——<code>npm ls -g</code> 显示包里确实存在，但启动器文件没了，还留下一个 <code>.opencode.cmd-HL4jbKan</code> 的残留临时文件——这是安装中断的经典痕迹。</p>
+<p><strong>第二级：验二进制。</strong> 发现 <code>bin\opencode.exe</code> 只有 479 字节，内容是一段报错脚本：<code>Error: opencode-ai's postinstall script was not run.</code>。原来 npm 主包只是包装器，真正的二进制在平台包（<code>opencode-windows-x64</code>，约 180MB）里，由 postinstall 脚本拷贝过来。对照官方 tarball 的哈希，确认已安装的三份 exe 全部损坏——<strong>最终结论：安装中断，不是配置、不是网络、不是镜像、不是安全策略</strong>。</p>
+<p><strong>第三级：换装。</strong> 从官方源重新拉取平台包，提取完好二进制替换三处损坏文件，重建启动器，一条命令验证：</p>
+<pre class="code"><span class="lang-tag">powershell</span><code class="lang-powershell">opencode --version   # → 1.18.25，恢复正常</code></pre>
+<h2 id="自愈命令速查"><a class="anchor" href="#自愈命令速查">#</a><span class="sec-num">三、</span>自愈命令速查</h2>
+<pre class="code"><span class="lang-tag">powershell</span><code class="lang-powershell"># 自愈①：重建二进制（安装中断后最常用）
+cd &quot;C:\Users\22971\AppData\Roaming\npm\node_modules\opencode-ai&quot;
+node postinstall.mjs
+
+# 自愈②：彻底重装（重建二进制 + 全部启动器）
+npm install -g opencode-ai@1.18.25 --force
+
+# 验证
+opencode --version
+opencode models   # 能看到 opencode-go/deepseek-v4-flash 即一切正常</code></pre>
+<h2 id="防复发清单"><a class="anchor" href="#防复发清单">#</a><span class="sec-num">四、</span>防复发清单</h2>
+<ol><li><strong>更新后 10 秒验证</strong>：<code>opencode --version</code> 能打印版本号 = 二进制完好。</li><li><strong>见到残留临时文件就是警报</strong>：<code>.opencode.cmd-XXXXX</code> 这类文件 = 上次安装中断的铁证。</li><li><strong>安装期间别中断</strong>：平台包 150–180MB，更新时保持网络稳定，先把正在运行的 opencode 会话退出。</li><li><strong>日志是最后的证人</strong>：<code>~/.local/share/opencode/log/opencode.log</code> 记录了一切，遇到 API 类问题先看它。</li></ol>
+<p>这次 3 小时的折腾，浓缩成上面四条，希望你的下一次&quot;崩溃&quot;只需要 10 分钟。</p>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">五、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-09-01</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

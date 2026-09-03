@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于 · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="on">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="wrap article"><article><p>你好，欢迎来到<strong>韶华实验室</strong>！</p>
+<p>这里记录着我的学习笔记、项目实战和踩坑经验。希望通过这些文章，既能帮助自己沉淀知识，也能给同样在路上的你一些参考。</p>
+<h2 id="我做什么">我做什么</h2>
+<ul><li>嵌入式开发：STM32 / ESP32 / 51 单片机</li><li>物联网应用：传感器、WiFi、MQTT、云平台对接</li><li>工具链折腾：AI 编程助手、本地服务、自动化脚本</li></ul>
+<h2 id="本站的技术栈">本站的技术栈</h2>
+<p>本站是一个<strong>零依赖的服务端渲染博客</strong>：</p>
+<table><thead><tr><th>组成</th><th>方案</th></tr></thead><tbody><tr><td>服务</td><td>Node.js 原生 http（零第三方依赖）</td></tr><tr><td>渲染</td><td>服务端自研轻量 Markdown 渲染器</td></tr><tr><td>内容</td><td><code>posts/</code> 目录下的 Markdown 文件，自动扫描成索引</td></tr><tr><td>前端</td><td>原生 HTML + CSS + JavaScript</td></tr><tr><td>端口</td><td>8766（<code>start-server.bat</code> 一键启动）</td></tr></tbody></table>
+<p>只需要装了 Node.js 就能跑，没有数据库、没有构建步骤、没有框架升级焦虑——这就是我想要的轻。</p>
+<blockquote><p>本站由 DeepSeek（DSH）与 opencode 协作完成：前者负责重构为服务端渲染版，后者完成了最初的纯前端版本。两版思路不同，各有取舍，欢迎对比着看。</p>
+</blockquote>
+<h2 id="联系我">联系我</h2>
+<p>如果文章有错误或疑问，欢迎随时交流，一起进步。</p>
+</article></main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

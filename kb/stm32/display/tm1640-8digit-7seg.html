@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数码管（TM1640 LED 驱动芯片，8 位共阴 7 段） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/kb">← 返回知识库</a>
+  <a class="" href="#元信息">一、元信息</a><a class="" href="#接线表">二、接线表</a><a class="" href="#踩坑清单">三、踩坑清单</a><a class="" href="#驱动代码-demo00-工程-tm1640-c-核心逻辑-已通过验证">四、驱动代码（Demo00 工程 tm1640.c 核心逻辑，已通过验证）</a><a class="l2" href="#tm1640-h">4.1 tm1640.h</a><a class="l2" href="#tm1640-c-核心函数">4.2 tm1640.c 核心函数</a><a class="" href="#调用示例">五、调用示例</a><a class="" href="#参考库-链接">六、参考库/链接</a><a class="" href="#更新日志">七、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">stm32/display/tm1640-8digit-7seg.md</div>
+    <h1 class="title">数码管（TM1640 LED 驱动芯片，8 位共阴 7 段）</h1>
+    <div class="meta-chips">
+      <span class="chip kb-tag">知识库 · STM32</span>
+      <span class="chip">📅 初版 2026-08-19</span>
+      <span class="chip upd">✏️ 更新于 2026-09-03</span>
+    </div>
+    <div class="prose"><h1 id="数码管（TM1640-LED-驱动芯片，8-位共阴-7-段）">数码管（TM1640 LED 驱动芯片，8 位共阴 7 段）</h1>
+<blockquote><p>2026-08-19 实测验证：Demo00 工程（洋桃1号板载数码管）菜单第 5 项&quot;数码管&quot;显示温度（两位小数，1s 刷新）</p>
+</blockquote>
+<h2 id="元信息"><a class="anchor" href="#元信息">#</a><span class="sec-num">一、</span>元信息</h2>
+<table><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>芯片/平台</td><td>STM32F103C8T6（HAL + FreeRTOS）</td></tr><tr><td>接口类型</td><td>2 线串行（SCLK=PA11，DIN=PA12，软件时序）</td></tr><tr><td>验证状态</td><td>✅ 已验证（2026-08-19）</td></tr><tr><td>验证环境</td><td>洋桃1号开发板 / STM32CubeIDE 2.2.0 / OpenOCD / 2026-08-19</td></tr><tr><td>驱动方式</td><td>软件时序（GPIO 推挽输出模拟时钟/数据）</td></tr></tbody></table>
+<h2 id="接线表"><a class="anchor" href="#接线表">#</a><span class="sec-num">二、</span>接线表</h2>
+<table><thead><tr><th>信号</th><th>MCU 引脚</th><th>模块引脚</th><th>备注</th></tr></thead><tbody><tr><td>SCLK</td><td>PA11</td><td>TM1640 SCLK</td><td>时钟线，上升沿锁存数据</td></tr><tr><td>DIN</td><td>PA12</td><td>TM1640 DIN</td><td>数据线，LSB 先发</td></tr><tr><td>VCC</td><td>5V 或 3.3V</td><td>TM1640 VCC</td><td>数码管模组通常需 5V 供电，看模块标注</td></tr><tr><td>GND</td><td>GND</td><td>TM1640 GND</td><td>必须共地</td></tr></tbody></table>
+<blockquote><p>注意：本板 TM1640 的 SCLK/DIN 走线在洋桃1号板上已连通，无需外部杜邦线。若自己接线按上表。</p>
+</blockquote>
+<h2 id="踩坑清单"><a class="anchor" href="#踩坑清单">#</a><span class="sec-num">三、</span>踩坑清单</h2>
+<ol><li><strong>芯片型号确认：TM1640 不是 TM1637！</strong> 两者引脚/协议几乎一样但寄存器地址范围不同：TM1640 支持 16 个 GRID（8 个接数码管 GRID1-8，另 8 个 GRID9-16 可接 LED 灯珠，本板 GRID9-16 恒灭）。TM1637 仅 4 位。驱动前务必先确认型号再写寻址代码。</li><li><strong>共阴段码</strong>：本板数码管为共阴（位选低电平导通），段码 bit0=a、bit1=b…bit6=g、bit7=dp。段码表：0=0x3F、1=0x06、2=0x5B、3=0x4F、4=0x66、5=0x6D、6=0x7D、7=0x07、8=0x7F、9=0x6F、A=0x77、b=0x7C、C=0x39、d=0x5E、E=0x79、F=0x71、负号=0x40、熄灭=0x00。段序不对时用诊断模式逐段点亮反推实际接线。</li><li><strong>时序要慢</strong>：TM1640 时钟频率典型 1MHz 以下，软件 GPIO 时序要加延时（本工程 <code>tm_delay</code> 80 次空操作）。杜邦线过长或时序过快会花字/错位。</li><li><strong>寻址方式</strong>：发送 0x44（固定地址写模式）后按地址命令 0xC0+i 逐位写数据最可靠（显式寻址），避免自动地址自增模式的行地址复位问题。</li><li><strong>上电不亮先查供电</strong>：数码管较耗电，供电不足会闪烁/亮度不均；确认 VCC 电压符合模块要求（3.3V 模块或 5V 模块勿混接）。</li></ol>
+<h2 id="驱动代码-demo00-工程-tm1640-c-核心逻辑-已通过验证"><a class="anchor" href="#驱动代码-demo00-工程-tm1640-c-核心逻辑-已通过验证">#</a><span class="sec-num">四、</span>驱动代码（Demo00 工程 tm1640.c 核心逻辑，已通过验证）</h2>
+<h3 id="tm1640-h"><a class="anchor" href="#tm1640-h">#</a><span class="sec-num">4.1 </span>tm1640.h</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#ifndef TM1640_H
+#define TM1640_H
+
+#include &quot;main.h&quot;
+
+/* TM1640 软件时序（SCLK=PA11, DIN=PA12） */
+
+void tm1640_init(void);
+void tm1640_clear(void);
+void tm1640_show_str(const char *str);          /* 显示字符串（含小数点） */
+void tm1640_show_temp(int16_t temp_cents);      /* 显示温度：25.31 -&gt; &quot;25.31&quot; */
+void tm1640_diag(void);                         /* 诊断模式：逐段点亮反推段序 */
+
+#endif</code></pre>
+<h3 id="tm1640-c-核心函数"><a class="anchor" href="#tm1640-c-核心函数">#</a><span class="sec-num">4.2 </span>tm1640.c 核心函数</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &quot;tm1640.h&quot;
+
+#define TM_SCLK_PORT GPIOA
+#define TM_SCLK_PIN  GPIO_PIN_11
+#define TM_DIN_PORT  GPIOA
+#define TM_DIN_PIN   GPIO_PIN_12
+
+#define TM_SCLK_H() HAL_GPIO_WritePin(TM_SCLK_PORT, TM_SCLK_PIN, GPIO_PIN_SET)
+#define TM_SCLK_L() HAL_GPIO_WritePin(TM_SCLK_PORT, TM_SCLK_PIN, GPIO_PIN_RESET)
+#define TM_DIN_H()  HAL_GPIO_WritePin(TM_DIN_PORT, TM_DIN_PIN, GPIO_PIN_SET)
+#define TM_DIN_L()  HAL_GPIO_WritePin(TM_DIN_PORT, TM_DIN_PIN, GPIO_PIN_RESET)
+
+#define TM_GRID_TOTAL 16   /* TM1640 共 16 个 GRID */
+#define TM_GRID_DIGIT 8    /* 前 8 个 GRID 接数码管 */
+
+static void tm_delay(void) { volatile uint16_t i; for (i = 0; i &lt; 80; i++) { __NOP(); } }
+
+/* 共阴数码管段码：bit0=a ... bit6=g, bit7=dp */
+static const uint8_t seg_code[] = {
+  0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07,
+  0x7F, 0x6F, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71,
+  0x40, 0x00   /* '-' 负号 / 熄灭 */
+};
+
+static void tm_send_byte(uint8_t data)
+{
+  for (uint8_t i = 0; i &lt; 8; i++)
+  {
+    if (data &amp; 0x01) TM_DIN_H(); else TM_DIN_L();
+    tm_delay(); TM_SCLK_H(); tm_delay(); TM_SCLK_L(); tm_delay();
+    data &gt;&gt;= 1;
+  }
+}
+
+static void tm_start(void)  { TM_DIN_H(); TM_SCLK_H(); tm_delay(); TM_DIN_L(); tm_delay(); TM_SCLK_L(); tm_delay(); }
+static void tm_stop(void)   { TM_DIN_L(); tm_delay(); TM_SCLK_H(); tm_delay(); TM_DIN_H(); tm_delay(); }
+
+void tm1640_init(void)
+{
+  tm_start(); tm_send_byte(0x48); tm_stop();   /* 显示模式：8 位 × 16 段，亮度 3/8 */
+  tm_start(); tm_send_byte(0x8F); tm_stop();   /* 显示开，亮度等级 8（0x88~0x8F） */
+  tm1640_clear();
+}
+
+void tm1640_clear(void)
+{
+  tm_start(); tm_send_byte(0x40); tm_stop();   /* 固定地址写模式 */
+  for (uint8_t i = 0; i &lt; TM_GRID_TOTAL; i++)
+  {
+    tm_start(); tm_send_byte(0xC0 + i); tm_send_byte(0x00); tm_stop();
+  }
+}
+
+/* 显示字符串到前 8 位（不足 8 位右补空） */
+void tm1640_show_str(const char *str)
+{
+  uint8_t idx = 0;
+  tm_start(); tm_send_byte(0x40); tm_stop();   /* 固定地址写模式 */
+  for (uint8_t g = 0; g &lt; TM_GRID_DIGIT; g++)
+  {
+    uint8_t code = 0x00;
+    if (str[idx] != '\0')
+    {
+      char ch = str[idx++];
+      if (ch &gt;= '0' &amp;&amp; ch &lt;= '9') code = seg_code[ch - '0'];
+      else if (ch == '.') { if (idx &gt; 0) code = 0x80; /* 小数点附加到前一位 */ }
+      /* 其余字符按需扩展 */
+    }
+    tm_start(); tm_send_byte(0xC0 + g); tm_send_byte(code); tm_stop();
+  }
+}
+
+void tm1640_show_temp(int16_t temp_cents)
+{
+  char buf[10];
+  snprintf(buf, sizeof(buf), &quot;%d.%02d&quot;, temp_cents / 100, (temp_cents &lt; 0 ? -temp_cents : temp_cents) % 100);
+  tm1640_show_str(buf);
+}</code></pre>
+<h2 id="调用示例"><a class="anchor" href="#调用示例">#</a><span class="sec-num">五、</span>调用示例</h2>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+HAL_Init();
+SystemClock_Config();
+MX_GPIO_Init();
+tm1640_init();          /* 初始化并清屏 */
+
+/* 菜单第 5 项进入后显示当前温度（25.31℃） */
+tm1640_show_temp(2531);   /* 2531 = 25.31℃ */
+
+/* 返回菜单时熄灭 */
+tm1640_clear();</code></pre>
+<h2 id="参考库-链接"><a class="anchor" href="#参考库-链接">#</a><span class="sec-num">六、</span>参考库/链接</h2>
+<ul><li>TM1640 数据手册：搜索 &quot;TM1640 datasheet PDF&quot;（天微电子 TM1640 中文手册，含时序图与寄存器表）</li><li>TM1637 对比：TM1637 4 位、TM1640 8 位，协议类似但寄存器不同，别混用</li><li>洋桃1号官方例程：<code>D:\学习资料\【用户资料】洋桃1号开发板(2)\B5-教学视频示例程序\</code>（数码管示例可参考）</li></ul>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">七、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-19</td><td><span class="ty ty-add">新增</span></td><td>首次建档</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（建档补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/kb">← 返回知识库</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

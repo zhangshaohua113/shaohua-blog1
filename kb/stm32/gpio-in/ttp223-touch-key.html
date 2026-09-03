@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>触摸按键（TTP223 x4） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/kb">← 返回知识库</a>
+  <a class="" href="#元信息">一、元信息</a><a class="" href="#接线表">二、接线表</a><a class="" href="#踩坑清单">三、踩坑清单</a><a class="" href="#驱动代码">四、驱动代码</a><a class="l2" href="#main-h-引脚-宏定义">4.1 main.h（引脚/宏定义）</a><a class="l2" href="#key-h">4.2 key.h</a><a class="l2" href="#key-c">4.3 key.c</a><a class="" href="#调用示例">五、调用示例</a><a class="" href="#调用示例-步进电机版-即按即转-松手即停-2026-08-20">六、调用示例（步进电机版：即按即转、松手即停，2026-08-20）</a><a class="" href="#参考库-链接">七、参考库/链接</a><a class="" href="#更新日志">八、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">stm32/gpio-in/ttp223-touch-key.md</div>
+    <h1 class="title">触摸按键（TTP223 x4）</h1>
+    <div class="meta-chips">
+      <span class="chip kb-tag">知识库 · STM32</span>
+      <span class="chip">📅 初版 2026-08-18</span>
+      <span class="chip upd">✏️ 更新于 2026-09-03</span>
+    </div>
+    <div class="prose"><h1 id="触摸按键（TTP223-x4）">触摸按键（TTP223 x4）</h1>
+<h2 id="元信息"><a class="anchor" href="#元信息">#</a><span class="sec-num">一、</span>元信息</h2>
+<table><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>芯片/平台</td><td>STM32F103C8T6（HAL）</td></tr><tr><td>接口类型</td><td>GPIO 输入（内部上拉）</td></tr><tr><td>验证状态</td><td>✅ 已验证</td></tr><tr><td>验证环境</td><td>Demo00 工程 / Keil MDK（AC5）/ 2026-08-18；OLED 菜单工程 + 步进电机工程（FreeRTOS 1ms 扫描 &amp; 直接轮询双采样）/ 2026-08-20</td></tr><tr><td>驱动方式</td><td>HAL（逻辑参照洋桃1号官方 1-2-22 范例：直接电平轮询）</td></tr></tbody></table>
+<h2 id="接线表"><a class="anchor" href="#接线表">#</a><span class="sec-num">二、</span>接线表</h2>
+<table><thead><tr><th>信号</th><th>MCU 引脚</th><th>模块引脚</th><th>备注</th></tr></thead><tbody><tr><td>KEY_A</td><td>PA0</td><td>TTP223-1 OUT</td><td>触摸 = 输出低电平</td></tr><tr><td>KEY_B</td><td>PA1</td><td>TTP223-2 OUT</td><td>触摸 = 输出低电平</td></tr><tr><td>KEY_C</td><td>PA2</td><td>TTP223-3 OUT</td><td>触摸 = 输出低电平</td></tr><tr><td>KEY_D</td><td>PA3</td><td>TTP223-4 OUT</td><td>触摸 = 输出低电平</td></tr><tr><td>VCC</td><td>3.3V</td><td>TTP223 VCC</td><td>2.0~5.5V</td></tr><tr><td>GND</td><td>GND</td><td>TTP223 GND</td><td>必须共地</td></tr></tbody></table>
+<h2 id="踩坑清单"><a class="anchor" href="#踩坑清单">#</a><span class="sec-num">三、</span>踩坑清单</h2>
+<ol><li><strong>直接用官方&quot;电平轮询&quot;最可靠（本工程实测结论）</strong>：洋桃1号官方 1-2-22 范例就是 <code>while(1){ if(!GPIO_ReadInputDataBit(...)){ ... } }</code>，<strong>无消抖、无边沿触发</strong>，TTP223 自带硬件消抖。HAL 等价写法 <code>if (HAL_GPIO_ReadPin(GPIOA, KEY_A_Pin) == GPIO_PIN_RESET)</code>。之前自写的&quot;按下边沿触发 + 释放消抖&quot;逻辑复杂，反而成为排查干扰源。</li><li><strong>继电器吸合瞬间的电磁干扰会让触摸误触发（2026-08-18 实测）</strong>：现象——继电器吸合后&quot;按 B/D 关不掉&quot;，按了 LED 只变暗不熄灭（A/C 被干扰误判为按下，relay_on 每轮循环覆盖 relay_off 的结果，LED 在高/低之间高速切换看起来变暗）。解法：主循环对每个按键<strong>连续两次采样（间隔 5ms）确认</strong>再动作，过滤瞬态干扰（代码见工程 main.c 主循环）。</li><li><strong>输出极性必须核对</strong>：TTP223 默认&quot;触摸输出低电平&quot;（<code>KEY_ACTIVE_LEVEL = GPIO_PIN_RESET</code>）。部分模块有跳线可切高低有效，极性搞反 = 永远&quot;按了没反应&quot;或&quot;一直触发&quot;。</li><li><strong>printf 卡死导致&quot;触摸没反应&quot;</strong>：程序里用 <code>printf</code> 而 Keil <strong>未勾选 MicroLIB</strong>，独立运行（无调试器）时 printf 走 semihosting 触发 BKPT 卡死，主循环不执行 → 按键轮询根本没跑。排查按键无响应先确认主循环在跑（可用点亮 LED 验证）。</li><li><strong>烧录旧 HEX 导致&quot;改了没效果&quot;</strong>：改完代码必须重新 F7 编译并确认 0 Error、HEX 时间戳/大小更新后再烧。曾出现&quot;HEX 编译时间(20:15)早于源码修改时间(20:17)&quot;导致烧的是旧代码的案例。</li><li><strong>上电瞬间输出不确定</strong>：TTP223 上电有约 0.5s 内部校准，期间输出可能抖动，若首次扫描过早可能误判一次按键。</li><li><strong>抗干扰</strong>：触摸走线远离继电器/电机等大电流线；手指带水、走线过长会导致误触发或没触发。</li><li><strong>MCU 引脚开内部上拉</strong>（<code>GPIO_PULLUP</code>），防止浮空误触发；TTP223 输出低有效时上拉不影响电平判定。</li><li><strong>电源不稳会放大按键异常</strong>：继电器线圈吸合若把 3.3V 拉垮，TTP223 供电不足会输出抖动/误触发。先保证供电充足，再谈软件消抖。</li><li><strong>别写复杂状态机（边沿触发 + 释放锁存），会卡状态（2026-08-20 实测）</strong>：步进电机固件原 <code>key_scan_hold()</code> 用&quot;按下边沿触发 + 释放需连续 2 次确认解锁&quot;的状态机，电机线圈电磁干扰下会偶发&quot;按了没反应 / 松手不停 / 乱转&quot;。解法：回到<strong>直接电平轮询 + 双采样</strong>（两次采样间隔 2ms 取与），无锁存状态，从机制上消除卡状态。</li><li><strong>printf 阻塞会拉长扫描周期，长按按循环次数计时会失真</strong>：115200 波特率每字符约 87µs，若主循环内按住时每轮都 <code>printf</code>（约 1.5ms），循环周期从 2ms 被拉到 ~4ms；而&quot;长按阈值&quot;若按<strong>循环次数</strong>累加（如 <code>key_hold_cnt &gt;= 250</code>），实际按住要 ~1 秒才响应，非常迟钝。解法：printf 只在状态变化时打一次，或改用 <code>HAL_GetTick()</code> 真实毫秒计时。</li><li><strong>固件不含 OLED 驱动 → 屏幕黑属正常，别误判板子没工作</strong>：不同固件外设不同，烧步进电机固件后 OLED 屏幕必然不亮。判断固件是否运行应看串口启动信息/电机动作/GPIO 电平，不要以屏幕亮不亮为准。</li></ol>
+<h2 id="驱动代码"><a class="anchor" href="#驱动代码">#</a><span class="sec-num">四、</span>驱动代码</h2>
+<p>（Demo00 最终版，2026-08-18 实测：触摸 A/B/C/D 正确控制继电器1/2 与 LED1/2）</p>
+<h3 id="main-h-引脚-宏定义"><a class="anchor" href="#main-h-引脚-宏定义">#</a><span class="sec-num">4.1 </span>main.h（引脚/宏定义）</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* CubeMX 生成区 */
+#define KEY_A_Pin GPIO_PIN_0
+#define KEY_A_GPIO_Port GPIOA
+#define KEY_B_Pin GPIO_PIN_1
+#define KEY_B_GPIO_Port GPIOA
+#define KEY_C_Pin GPIO_PIN_2
+#define KEY_C_GPIO_Port GPIOA
+#define KEY_D_Pin GPIO_PIN_3
+#define KEY_D_GPIO_Port GPIOA
+
+/* USER CODE BEGIN Private defines */
+#define KEY_ACTIVE_LEVEL    0   /* 低电平有效（触摸=低） */
+/* USER CODE END Private defines */</code></pre>
+<h3 id="key-h"><a class="anchor" href="#key-h">#</a><span class="sec-num">4.2 </span>key.h</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#ifndef KEY_H
+#define KEY_H
+
+#include &quot;main.h&quot;
+
+void    key_init(void);    /* GPIO 输入上拉初始化（CubeMX 的 MX_GPIO_Init 已含） */
+
+#endif /* KEY_H */</code></pre>
+<h3 id="key-c"><a class="anchor" href="#key-c">#</a><span class="sec-num">4.3 </span>key.c</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &quot;key.h&quot;
+
+void key_init(void)
+{
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    GPIO_InitTypeDef g = {0};
+    g.Mode  = GPIO_MODE_INPUT;
+    g.Pull  = GPIO_PULLUP;
+    g.Speed = GPIO_SPEED_FREQ_LOW;
+    g.Pin   = KEY_A_Pin | KEY_B_Pin | KEY_C_Pin | KEY_D_Pin;
+    HAL_GPIO_Init(GPIOA, &amp;g);
+}</code></pre>
+<blockquote><p>注：官方范例并未单独写按键驱动文件，直接在 main 主循环读电平。CubeMX 生成的 <code>gpio.c::MX_GPIO_Init()</code> 已经把 PA0-PA3 配成上拉输入，工程里无需再调 <code>key_init()</code>。</p>
+</blockquote>
+<h2 id="调用示例"><a class="anchor" href="#调用示例">#</a><span class="sec-num">五、</span>调用示例</h2>
+<p>（✅ 已验证：直接电平轮询，无消抖）</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+HAL_Init();
+SystemClock_Config();   /* 外部 8MHz 晶振 ×9 = 72MHz */
+MX_GPIO_Init();         /* 已配置 PA0-PA3 上拉输入 */
+MX_USART1_UART_Init();
+relay_init();           /* 继电器/指示灯初始化 */
+
+/* 主循环：官方 1-2-22 风格，触摸低电平有效，按下执行 */
+while (1)
+{
+    if (HAL_GPIO_ReadPin(KEY_A_GPIO_Port, KEY_A_Pin) == GPIO_PIN_RESET)
+        relay_on(RELAY_ID_1);        /* 触摸A → 继电器1吸合 */
+    if (HAL_GPIO_ReadPin(KEY_B_GPIO_Port, KEY_B_Pin) == GPIO_PIN_RESET)
+        relay_off(RELAY_ID_1);       /* 触摸B → 继电器1断开 */
+    if (HAL_GPIO_ReadPin(KEY_C_GPIO_Port, KEY_C_Pin) == GPIO_PIN_RESET)
+        relay_on(RELAY_ID_2);        /* 触摸C → 继电器2吸合 */
+    if (HAL_GPIO_ReadPin(KEY_D_GPIO_Port, KEY_D_Pin) == GPIO_PIN_RESET)
+        relay_off(RELAY_ID_2);       /* 触摸D → 继电器2断开 */
+}</code></pre>
+<h2 id="调用示例-步进电机版-即按即转-松手即停-2026-08-20"><a class="anchor" href="#调用示例-步进电机版-即按即转-松手即停-2026-08-20">#</a><span class="sec-num">六、</span>调用示例（步进电机版：即按即转、松手即停，2026-08-20）</h2>
+<p>（✅ 方案已应用在 Demo00 步进电机固件；电机本体当时单独调试中）</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+key_init();           /* PA0-PA3 上拉输入（CubeMX 或手动） */
+step_motor_init();    /* PB3/PB4/PB8/PB9 推挽输出（需先释放 JTAG） */
+
+uint8_t key_val;
+SM_Dir_t cur_dir = SM_STOP;
+
+for (;;)
+{
+    /* 第 1 次采样 */
+    uint8_t s1 = 0;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_A_PIN) == GPIO_PIN_RESET) s1 |= KEY_A;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_B_PIN) == GPIO_PIN_RESET) s1 |= KEY_B;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_C_PIN) == GPIO_PIN_RESET) s1 |= KEY_C;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_D_PIN) == GPIO_PIN_RESET) s1 |= KEY_D;
+
+    step_motor_tick();          /* 非阻塞步进（HAL_GetTick 真实计时） */
+
+    HAL_Delay(2);               /* 两次采样间隔 */
+
+    /* 第 2 次采样：双采样确认（s1 &amp; s2），过滤电机/继电器电磁瞬态干扰 */
+    uint8_t s2 = 0;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_A_PIN) == GPIO_PIN_RESET) s2 |= KEY_A;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_B_PIN) == GPIO_PIN_RESET) s2 |= KEY_B;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_C_PIN) == GPIO_PIN_RESET) s2 |= KEY_C;
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_D_PIN) == GPIO_PIN_RESET) s2 |= KEY_D;
+
+    key_val = s1 &amp; s2;
+
+    /* 即按即转、松手即停 */
+    SM_Dir_t dir = SM_STOP;
+    if (key_val &amp; KEY_A)      dir = SM_CW_4;    /* A=顺时针快转 */
+    else if (key_val &amp; KEY_B) dir = SM_CCW_4;   /* B=逆时针快转 */
+    else if (key_val &amp; KEY_C) dir = SM_CW_8;    /* C=顺时针慢转 */
+    else if (key_val &amp; KEY_D) dir = SM_CCW_8;   /* D=逆时针慢转 */
+
+    if (dir != cur_dir)         /* 只在状态变化时动作 + 打印，避免 printf 阻塞扫描周期 */
+    {
+        cur_dir = dir;
+        if (dir == SM_STOP) step_motor_stop();
+        else step_motor_set_dir(dir);
+    }
+
+    HAL_Delay(2);               /* 扫描周期 */
+}</code></pre>
+<h2 id="参考库-链接"><a class="anchor" href="#参考库-链接">#</a><span class="sec-num">七、</span>参考库/链接</h2>
+<ul><li>洋桃1号官方范例（本地）：<code>D:\学习资料\【用户资料】洋桃1号开发板(2)\B5-教学视频示例程序\1-2-22-按键控制继电器程序\</code>（<code>Hardware/TOUCH_KEY/touch_key.c</code>、<code>User/main.c</code> 直接轮询写法）</li><li>TTP223 数据手册：搜索 &quot;TTP223 datasheet PDF&quot;（官方 Tontek）</li></ul>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">八、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-18</td><td><span class="ty ty-add">新增</span></td><td>首次建档</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（建档补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/kb">← 返回知识库</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

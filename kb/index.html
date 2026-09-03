@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嵌入式驱动知识库 · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="wrap kb-page">
+  <header class="article-head">
+    <div class="card-meta"><span class="tag kb-tag">知识库</span><span class="kb-status online">15 篇档案 · 内置随站 · 最近更新 2026-09-03</span></div>
+    <h1>嵌入式驱动知识库</h1>
+    <p class="dim">stm32 / esp32 / linux 驱动档案：寄存器手册、踩坑笔记、可复用方案，随博客打包、离线可用。</p>
+  </header>
+  <div class="cat"><div class="card">
+  <div class="card-head"><h2><span>🧠</span> STM32 专区 <span class="tag">HAL / LL / 寄存器</span></h2>
+  <p>HAL/LL/寄存器驱动，按外设类别分子目录。</p></div>
+  <div class="card-body">
+    <div class="sub-tag">全部档案 <span class="count">5</span><span class="kb-latest">✏️ 最近更新 2026-09-03</span></div>
+    <div class="modules" data-key="stm32" data-hidden="2" data-limit="3"><a class="mod" href="/kb/stm32/display/oled-sh1106">
+  <span class="name">OLED 屏幕（SH1106，I2C 128x64）</span>
+  <span class="badge b-ok">✅ 已验证（2026-08-19）</span>
+  <span class="meta">I2C（软件模拟，SCL=PB6，SDA=PB7） · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/stm32/display/tm1640-8digit-7seg">
+  <span class="name">数码管（TM1640 LED 驱动芯片，8 位共阴 7 段）</span>
+  <span class="badge b-ok">✅ 已验证（2026-08-19）</span>
+  <span class="meta">2 线串行（SCLK=PA11，DIN=PA12，软件时序） · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/stm32/gpio-in/ttp223-touch-key">
+  <span class="name">触摸按键（TTP223 x4）</span>
+  <span class="badge b-ok">✅ 已验证</span>
+  <span class="meta">GPIO 输入（内部上拉） · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/stm32/gpio-out/relay-uln2003">
+  <span class="name">继电器（ULN2003 驱动，2 路）</span>
+  <span class="badge b-ok">✅ 已验证</span>
+  <span class="meta">GPIO 推挽输出 · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/stm32/sensor/lm75a-i2c-temp">
+  <span class="name">温度传感器（LM75A，I2C 数字温度传感器）</span>
+  <span class="badge b-ok">✅ 已验证（2026-08-19）</span>
+  <span class="meta">I2C（软件模拟，与 OLED 共用总线：SCL=PB6，SDA=PB7） · 更新 2026-09-03</span>
+</a></div>
+    <button class="more" type="button" data-count="2">还有 2 个 ▾</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-head"><h2><span>📡</span> ESP32 专区 <span class="tag">ESP-IDF / Arduino</span></h2>
+  <p>ESP-IDF / Arduino 框架驱动。（建设中）</p></div>
+  <div class="card-body">
+    <div class="sub-tag">全部档案 <span class="count">5</span><span class="kb-latest">✏️ 最近更新 2026-09-03</span></div>
+    <div class="modules" data-key="esp32" data-hidden="2" data-limit="3"><a class="mod" href="/kb/esp32/untested/dht11-temp-humidity">
+  <span class="name">温度传感器（DHT11）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">单总线数据（OneWire） · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/esp32/untested/relay-uln2003">
+  <span class="name">继电器（ULN2003）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">GPIO 推挽输出 · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/esp32/untested/ssd1306-oled">
+  <span class="name">OLED 屏幕（SSD1306，I2C 128x64）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">I2C 128x64 · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/esp32/untested/tm1637-7segment">
+  <span class="name">数码管（TM1637，4 位）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">2 线串行（CLK/DIO） · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/esp32/untested/ttp223-touch-key">
+  <span class="name">触摸按键（TTP223）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">GPIO 输入（内部上拉） · 更新 2026-09-03</span>
+</a></div>
+    <button class="more" type="button" data-count="2">还有 2 个 ▾</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-head"><h2><span>🐧</span> LINUX 专区 <span class="tag">sysfs / i2c-dev / spidev</span></h2>
+  <p>用户态驱动（sysfs / ioctl / spidev / i2c-dev）。（建设中）</p></div>
+  <div class="card-body">
+    <div class="sub-tag">全部档案 <span class="count">5</span><span class="kb-latest">✏️ 最近更新 2026-09-03</span></div>
+    <div class="modules" data-key="linux" data-hidden="2" data-limit="3"><a class="mod" href="/kb/linux/untested/dht11-temp-humidity">
+  <span class="name">温度传感器（DHT11）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">单总线数据（OneWire） · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/linux/untested/relay-uln2003">
+  <span class="name">继电器（ULN2003）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">GPIO 推挽输出 · 更新 2026-09-03</span>
+</a>
+<a class="mod" href="/kb/linux/untested/ssd1306-oled">
+  <span class="name">OLED 屏幕（SSD1306，I2C 128x64）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">I2C 128x64 · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/linux/untested/tm1637-7segment">
+  <span class="name">数码管（TM1637，4 位）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">2 线串行（CLK/DIO） · 更新 2026-09-03</span>
+</a>
+<a class="mod kb-hide" href="/kb/linux/untested/ttp223-touch-key">
+  <span class="name">触摸按键（TTP223）</span>
+  <span class="badge b-no">❌ 未验证（占位档案，用于测试目录页显示/滚动/搜索）</span>
+  <span class="meta">GPIO 输入（内部上拉） · 更新 2026-09-03</span>
+</a></div>
+    <button class="more" type="button" data-count="2">还有 2 个 ▾</button>
+  </div>
+</div></div>
+  <nav class="pager"><a href="/#posts">← 返回首页</a><a href="/">首页</a></nav>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

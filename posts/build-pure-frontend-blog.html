@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纯前端博客搭建教程：HTML + Markdown + GitHub Pages · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="on">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="" href="#为什么选择纯静态博客">一、为什么选择纯静态博客</a><a class="" href="#整体架构">二、整体架构</a><a class="" href="#添加一篇文章">三、添加一篇文章</a><a class="" href="#部署到-github-pages">四、部署到 GitHub Pages</a><a class="" href="#部署到-edgeone-pages">五、部署到 EdgeOne Pages</a><a class="" href="#总结">六、总结</a><a class="" href="#更新日志">七、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">posts/build-pure-frontend-blog.md</div>
+    <h1 class="title">纯前端博客搭建教程：HTML + Markdown + GitHub Pages</h1>
+    <div class="meta-chips">
+      <div class="dates">
+        <div class="dt"><span>📅 发布日期</span><b>2026-08-31</b></div>
+        <div class="dt up"><span>✏️ 更新日期</span><b>2026-09-03</b></div>
+      </div>
+      <span class="chip">建站</span>
+      <span class="chip">5 分钟阅读</span>
+      <span class="chip">#博客</span><span class="chip">#教程</span><span class="chip">#静态站点</span>
+    </div>
+    <div class="prose"><h1 id="纯前端博客搭建教程：HTML-+-Markdown-+-GitHub-Pages">纯前端博客搭建教程：HTML + Markdown + GitHub Pages</h1>
+<p>很多人想拥有自己的博客，但被服务器、域名、建站程序劝退。其实对个人博客来说，最省心的方案是：<strong>纯静态站点 + 免费静态托管</strong>。这篇文章手把手教你复刻本站的架构。</p>
+<h2 id="为什么选择纯静态博客"><a class="anchor" href="#为什么选择纯静态博客">#</a><span class="sec-num">一、</span>为什么选择纯静态博客</h2>
+<p>对比常见方案：</p>
+<table><thead><tr><th>方案</th><th>成本</th><th>维护难度</th><th>速度</th></tr></thead><tbody><tr><td>WordPress</td><td>服务器 + 域名</td><td>高，要打补丁防攻击</td><td>一般</td></tr><tr><td>Hexo / Hugo</td><td>免费</td><td>中，需要构建工具链</td><td>快</td></tr><tr><td>纯静态（本站方案）</td><td>免费</td><td>低，改个配置就行</td><td>极快</td></tr></tbody></table>
+<p>纯静态方案最大的优势：<strong>没有服务器、没有数据库、没有动态语言</strong>，天然安全，部署即上线。</p>
+<h2 id="整体架构"><a class="anchor" href="#整体架构">#</a><span class="sec-num">二、</span>整体架构</h2>
+<pre class="code"><span class="lang-tag">txt</span><code class="lang-">blog/
+├── index.html          # 入口页面
+├── css/                # 样式文件
+├── js/
+│   ├── config.js       # 站点配置 + 文章元信息
+│   ├── router.js       # hash 路由
+│   ├── renderer.js     # 页面渲染
+│   └── app.js          # 入口逻辑
+├── posts/              # 文章目录（Markdown）
+└── about.md            # 关于页面</code></pre>
+<p>核心思路：<code>config.js</code> 里登记文章的元信息（标题、日期、标签），页面跳转时用 <code>fetch</code> 加载对应的 <code>.md</code> 文件，交给 <code>marked</code> 转成 HTML 渲染。</p>
+<h2 id="添加一篇文章"><a class="anchor" href="#添加一篇文章">#</a><span class="sec-num">三、</span>添加一篇文章</h2>
+<p>只需两步：</p>
+<ol><li>在 <code>posts/</code> 目录新建一个 Markdown 文件，例如 <code>my-first-post.md</code>；</li><li>在 <code>js/config.js</code> 的 <code>posts</code> 数组里登记：</li></ol>
+<pre class="code"><span class="lang-tag">js</span><code class="lang-js">{
+  slug: 'my-first-post',
+  title: '我的第一篇文章',
+  date: '2026-09-01',
+  category: '随笔',
+  tags: ['随笔', '生活'],
+  excerpt: '这篇文章讲的是……',
+  published: true
+}</code></pre>
+<p>刷新页面，文章就会出现在首页列表里。</p>
+<h2 id="部署到-github-pages"><a class="anchor" href="#部署到-github-pages">#</a><span class="sec-num">四、</span>部署到 GitHub Pages</h2>
+<ol><li>在 GitHub 新建仓库，把整个目录推上去；</li><li>进入仓库 <strong>Settings → Pages</strong>；</li><li>Source 选择 <code>Deploy from a branch</code>，分支选 <code>main</code>，目录选 <code>/ (root)</code>；</li><li>等一两分钟，访问 <code>https://你的用户名.github.io/仓库名/</code> 即可。</li></ol>
+<blockquote><p>小提示：部署在仓库子路径时，<code>config.js</code> 里的 <code>baseUrl</code> 要改成 <code>/仓库名/</code>；如果用自定义域名或 EdgeOne Pages，保持空字符串即可。</p>
+</blockquote>
+<h2 id="部署到-edgeone-pages"><a class="anchor" href="#部署到-edgeone-pages">#</a><span class="sec-num">五、</span>部署到 EdgeOne Pages</h2>
+<ol><li>登录 EdgeOne 控制台，进入 <strong>Pages</strong>；</li><li>新建项目，上传本地目录或关联 Git 仓库；</li><li>构建配置留空（纯静态不需要构建），部署完成后即可通过生成的域名访问。</li></ol>
+<h2 id="总结"><a class="anchor" href="#总结">#</a><span class="sec-num">六、</span>总结</h2>
+<p>这个方案五脏俱全：文章列表、搜索、标签、文章详情、关于页面都有，而且全文只有几个小文件。如果你也想搭一个属于自己的博客，复制这套架构，改改配置就能用。</p>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">七、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-31</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

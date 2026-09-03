@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>博客域名部署全流程实录：从本地到全球可访问（含全部踩坑） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="on">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="" href="#一-整体架构与路线图">一、整体架构与路线图</a><a class="" href="#二-域名选购-后缀怎么选才划算">二、域名选购：后缀怎么选才划算</a><a class="l2" href="#2-1-候选后缀对比-2026-年行情-人民币">2.1 候选后缀对比（2026 年行情，人民币）</a><a class="l2" href="#2-2-本次选购实录">2.2 本次选购实录</a><a class="l2" href="#2-3-备案到底要不要">2.3 备案到底要不要？</a><a class="" href="#三-edgeone-pages-部署-线上版第一站">三、EdgeOne Pages 部署（线上版第一站）</a><a class="" href="#四-绑定自定义域名全流程-核心">四、绑定自定义域名全流程（核心）</a><a class="l2" href="#第-1-步-添加自定义域名">第 1 步：添加自定义域名</a><a class="l2" href="#第-2-步-归属权验证-txt-记录">第 2 步：归属权验证（TXT 记录）</a><a class="l2" href="#第-3-步-添加-cname-记录-本次最大坑-见坑-3">第 3 步：添加 CNAME 记录（本次最大坑，见坑 3）</a><a class="l2" href="#第-4-步-等待边缘节点同步-签发证书">第 4 步：等待边缘节点同步 + 签发证书</a><a class="l2" href="#第-5-步-开启三个安全开关-建议全开">第 5 步：开启三个安全开关（建议全开）</a><a class="l2" href="#完成标准-自查清单">完成标准（自查清单）</a><a class="" href="#五-踩坑全记录-按发生顺序">五、踩坑全记录（按发生顺序）</a><a class="l2" href="#坑-1-一直提示-请输入正确格式的域名">坑 1：一直提示「请输入正确格式的域名」</a><a class="l2" href="#坑-2-txt-记录提示-最快-30-分钟-一般-24-48-小时生效">坑 2：TXT 记录提示&quot;最快 30 分钟、一般 24~48 小时生效&quot;</a><a class="l2" href="#坑-3-cname-记录值填错-本次最大的坑">坑 3：CNAME 记录值填错 —— 本次最大的坑</a><a class="l2" href="#坑-4-部署后-时好时坏-10-次请求一半超时">坑 4：部署后&quot;时好时坏&quot;——10 次请求一半超时</a><a class="l2" href="#坑-5-全设备弹-证书过期-不安全网站">坑 5：全设备弹&quot;证书过期 / 不安全网站&quot;</a><a class="l2" href="#坑-6-找不到-验证-按钮-控制台入口-404">坑 6：找不到「验证」按钮 / 控制台入口 404</a><a class="l2" href="#坑-7-本机-curl-报-could-not-resolve-host-但公共-dns-明明是好的">坑 7：本机 curl 报 &quot;Could not resolve host&quot;，但公共 DNS 明明是好的</a><a class="" href="#六-费用总结与长期运维">六、费用总结与长期运维</a><a class="l2" href="#6-1-花费清单">6.1 花费清单</a><a class="l2" href="#6-2-日常维护流程-写文章-上线">6.2 日常维护流程（写文章 → 上线）</a><a class="l2" href="#6-3-备份与换机">6.3 备份与换机</a><a class="l2" href="#6-4-未来可选项">6.4 未来可选项</a><a class="" href="#七-避坑速查表-一页版">七、避坑速查表（一页版）</a><a class="" href="#结语">八、结语</a><a class="" href="#更新日志">九、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">posts/domain-deploy-full-guide.md</div>
+    <h1 class="title">博客域名部署全流程实录：从本地到全球可访问（含全部踩坑）</h1>
+    <div class="meta-chips">
+      <div class="dates">
+        <div class="dt"><span>📅 发布日期</span><b>2026-09-02</b></div>
+        <div class="dt up"><span>✏️ 更新日期</span><b>2026-09-03</b></div>
+      </div>
+      <span class="chip">博客</span>
+      <span class="chip">24 分钟阅读</span>
+      <span class="chip">#部署</span><span class="chip">#EdgeOne</span><span class="chip">#域名</span><span class="chip">#HTTPS</span><span class="chip">#腾讯云</span>
+    </div>
+    <div class="prose"><h1 id="博客域名部署全流程实录：从本地到全球可访问">博客域名部署全流程实录：从本地到全球可访问</h1>
+<blockquote><p>本文是本博客上线过程的真实记录。写它是因为：<strong>过程比预想曲折得多</strong>——光是&quot;请输入正确格式的域名&quot;就卡了很久，中间还有 CNAME 填错、节点不同步、证书警告等一连串坑。把这些全记下来，供自己以后换域名/换电脑参考，也供想给个人站点上线的朋友避坑。</p>
+</blockquote>
+<hr>
+<h2 id="一-整体架构与路线图"><a class="anchor" href="#一-整体架构与路线图">#</a>一、整体架构与路线图</h2>
+<pre class="code"><span class="lang-tag">txt</span><code class="lang-">本地 blog 目录（node server.js，端口 8766）─── 日常写作、改样式
+        │
+        ▼  node build-static.js（零依赖静态化）
+   dist/ 静态产物 ──── 打 zip 上传 ────► 腾讯云 EdgeOne Pages（项目 my-blog）
+        │
+        ▼  绑定自定义域名 shaohua-lab.top（本文主题）
+   全球边缘节点 + 免费 DV 证书 + 强制 HTTPS = 全球可访问</code></pre>
+<ul><li><strong>本地版</strong>：<code>node server.js</code> → http://localhost:8766（写作预览用）</li><li><strong>线上版</strong>：https://shaohua-lab.top（EdgeOne Pages 托管，全站静态化）</li><li><strong>核心事实</strong>：EdgeOne Pages 是腾讯云的边缘函数静态托管，<strong>免费额度足够个人博客长期跑</strong>，未备案域名也能用（服务走边缘节点，不强制大陆节点）。</li></ul>
+<h2 id="二-域名选购-后缀怎么选才划算"><a class="anchor" href="#二-域名选购-后缀怎么选才划算">#</a>二、域名选购：后缀怎么选才划算</h2>
+<h3 id="2-1-候选后缀对比-2026-年行情-人民币"><a class="anchor" href="#2-1-候选后缀对比-2026-年行情-人民币">#</a>2.1 候选后缀对比（2026 年行情，人民币）</h3>
+<table><thead><tr><th>后缀</th><th>首年价</th><th>续费价/年</th><th>特点</th><th>建议</th></tr></thead><tbody><tr><td><code>.com</code></td><td>60~90</td><td>60~90</td><td>最主流、最贵</td><td>有预算首选，但便宜好记的早就被抢光</td></tr><tr><td><code>.top</code></td><td><strong>14（促销）</strong></td><td>约 34</td><td>便宜、够用</td><td><strong>个人博客性价比之选</strong>（本文选择）</td></tr><tr><td><code>.xyz</code> / <code>.site</code></td><td>10~20</td><td>30~80</td><td>便宜但续费波动大</td><td>可考虑，注意看续费价</td></tr><tr><td><code>.cn</code></td><td>30 左右</td><td>30~60</td><td>国内后缀，实名必须</td><td>国内备案/合规场景更顺</td></tr><tr><td><code>.io</code> / <code>.dev</code> 等</td><td>100+</td><td>100+</td><td>程序员情怀价</td><td>预算充裕再说</td></tr></tbody></table>
+<blockquote><p>关键教训：<strong>首年的&quot;促销价&quot;不是真实成本，续费价才是</strong>。买之前一定查两个数：首年价 + 续费价。</p>
+</blockquote>
+<h3 id="2-2-本次选购实录"><a class="anchor" href="#2-2-本次选购实录">#</a>2.2 本次选购实录</h3>
+<ul><li>想要的名字 <code>shaohua.top</code> 被抢注，溢价盘标价 <strong>268 元</strong>——<strong>溢价域名果断放弃</strong>，不惯着。</li><li>最终定了 <code>shaohua-lab.top</code>：首年 14 元（促销），续费约 34 元/年；<code>.top</code> 后缀对个人博客完全够用，搜索/社交场景没有明显劣势。</li><li>购买时<strong>只买域名本身</strong>，三样附加服务一律不勾：</li><li>❌ 轻量应用服务器（不需要，托管在 EdgeOne Pages）</li><li>❌ DNS 解析付费版（腾讯云自带免费 DNS 够用）</li><li>❌ SSL 证书付费版（EdgeOne 绑定域名后自动签发免费证书）</li><li>结算前需创建<strong>域名模板（实名认证）</strong>：传身份证正反面，几分钟过审。未实名前解析不对外生效。</li></ul>
+<h3 id="2-3-备案到底要不要"><a class="anchor" href="#2-3-备案到底要不要">#</a>2.3 备案到底要不要？</h3>
+<table><thead><tr><th>场景</th><th>是否需要备案</th></tr></thead><tbody><tr><td>域名 + 大陆服务器（轻量/CVM/COS 大陆地域）</td><td><strong>需要</strong> ICP 备案</td></tr><tr><td>域名 + EdgeOne Pages / 境外托管</td><td>不需要（本文路线）</td></tr></tbody></table>
+<p>一句话：<strong>备案和你的网站能不能用 HTTPS 毫无关系</strong>。证书问题是证书的事（见坑 5），别被&quot;没备案所以证书警告&quot;的传言误导。将来若要上大陆服务器再补备案即可。</p>
+<h2 id="三-edgeone-pages-部署-线上版第一站"><a class="anchor" href="#三-edgeone-pages-部署-线上版第一站">#</a>三、EdgeOne Pages 部署（线上版第一站）</h2>
+<ol><li>腾讯云控制台 → EdgeOne → <strong>Pages</strong> → 新建项目，命名如 <code>my-blog</code>；</li><li>上传方式二选一：直接把 <code>dist/</code> 目录拖进去，或打 zip 上传（本次用 zip，30 个文件约 93KB）；</li><li>部署完成后会得到一个<strong>预览域名</strong>（如 <code>my-blog-dpp2q6m2b7xl.edgeone.cool</code>）：</li></ol>
+<ul><li>⚠️ 预览域名<strong>约 3 小时时效</strong>，且访问要带 <code>?eo_token</code> 参数；</li><li>要变永久，必须绑定自己的自定义域名（下一节）。</li></ul>
+<h2 id="四-绑定自定义域名全流程-核心"><a class="anchor" href="#四-绑定自定义域名全流程-核心">#</a>四、绑定自定义域名全流程（核心）</h2>
+<h3 id="第-1-步-添加自定义域名"><a class="anchor" href="#第-1-步-添加自定义域名">#</a>第 1 步：添加自定义域名</h3>
+<p>EdgeOne Pages → my-blog → 设置 → <strong>自定义域名</strong> → 添加 <code>shaohua-lab.top</code>。</p>
+<h3 id="第-2-步-归属权验证-txt-记录"><a class="anchor" href="#第-2-步-归属权验证-txt-记录">#</a>第 2 步：归属权验证（TXT 记录）</h3>
+<p>EdgeOne 会给出三条信息，去腾讯云「域名解析」里照抄：</p>
+<table><thead><tr><th>字段</th><th>填写内容</th></tr></thead><tbody><tr><td>主机记录</td><td><code>edgeonereclaim</code>（EdgeOne 给）</td></tr><tr><td>记录类型</td><td><code>TXT</code></td></tr><tr><td>记录值</td><td><code>reclaim-xxx</code>（EdgeOne 给的随机串）</td></tr></tbody></table>
+<p>保存后<strong>直接可以点「验证」</strong>——腾讯云提示的&quot;24~48 小时生效&quot;是最坏情况说明，实际实测 <strong>1 分钟</strong>全球生效（见坑 2）。</p>
+<h3 id="第-3-步-添加-cname-记录-本次最大坑-见坑-3"><a class="anchor" href="#第-3-步-添加-cname-记录-本次最大坑-见坑-3">#</a>第 3 步：添加 CNAME 记录（本次最大坑，见坑 3）</h3>
+<table><thead><tr><th>字段</th><th>填写内容</th></tr></thead><tbody><tr><td>主机记录</td><td><code>@</code>（代表根域名）</td></tr><tr><td>记录类型</td><td><code>CNAME</code></td></tr><tr><td>记录值</td><td><strong>EdgeOne 给的完整地址原样照抄</strong>，如 <code>shaohua-lab.top.pages.dnsoe5.com</code></td></tr></tbody></table>
+<h3 id="第-4-步-等待边缘节点同步-签发证书"><a class="anchor" href="#第-4-步-等待边缘节点同步-签发证书">#</a>第 4 步：等待边缘节点同步 + 签发证书</h3>
+<ul><li>绑定后 EdgeOne 会自动部署域名配置，<strong>全球边缘节点逐台同步</strong>，约 10~30 分钟收敛（期间可能&quot;时好时坏&quot;，见坑 4）；</li><li>去「域名管理 → HTTPS 配置」<strong>申请免费 DV 证书</strong>（0 元，自动完成验证，几分钟签发）。<strong>没签证书前浏览器一定弹&quot;不安全&quot;</strong>（见坑 5）。</li></ul>
+<h3 id="第-5-步-开启三个安全开关-建议全开"><a class="anchor" href="#第-5-步-开启三个安全开关-建议全开">#</a>第 5 步：开启三个安全开关（建议全开）</h3>
+<table><thead><tr><th>开关</th><th>建议</th><th>说明</th></tr></thead><tbody><tr><td>强制 HTTPS</td><td>✅ 开</td><td>重定向方式选 <strong>301</strong>（永久跳转，对 SEO 友好）</td></tr><tr><td>HSTS</td><td>✅ 开（证书生效后）</td><td>缓存时间 365 天、包含子域名、预加载均可开；含义 = 浏览器强制该域名永远走 HTTPS</td></tr><tr><td>OCSP 装订</td><td>✅ 开</td><td>纯性能优化，零副作用</td></tr></tbody></table>
+<blockquote><p>HSTS「预加载」开启后<strong>本域名终身强制 HTTPS</strong>（EdgeOne 只下发声明头，不会自动提交预载名单，所以可逆，只是要等缓存过期）。只要没有退回 HTTP 的计划，开着没问题。</p>
+</blockquote>
+<h3 id="完成标准-自查清单"><a class="anchor" href="#完成标准-自查清单">#</a>完成标准（自查清单）</h3>
+<ul><li>[ ] http:// 访问自动 301 跳 https://</li><li>[ ] 浏览器无任何证书警告（手机/电脑/平板各试一次）</li><li>[ ] 证书 CN 等于你的域名（如 <code>CN=shaohua-lab.top</code>），非默认兜底证书</li><li>[ ] 多网络（WiFi/流量）都能打开</li></ul>
+<h2 id="五-踩坑全记录-按发生顺序"><a class="anchor" href="#五-踩坑全记录-按发生顺序">#</a>五、踩坑全记录（按发生顺序）</h2>
+<h3 id="坑-1-一直提示-请输入正确格式的域名"><a class="anchor" href="#坑-1-一直提示-请输入正确格式的域名">#</a>坑 1：一直提示「请输入正确格式的域名」</h3>
+<ul><li><strong>现象</strong>：明明切了英文输入法、看着也是半角，填 <code>shaohua-lab.top</code> 还是报格式错误。</li><li><strong>根因</strong>：报错的几乎从不是&quot;域名本身&quot;，而是<strong>粘贴内容带隐形杂质</strong>：</li><li>带了 <code>https://</code> 或 <code>www.</code> 前缀（购买搜索框不允许）；</li><li>全角符号（<code>－</code>全角连字符、<code>．</code>全角点）；</li><li>尾部空格 / 反斜杠 / 斜杠；</li><li>从微信/Word 复制带进来的隐藏换行、弯引号。</li><li><strong>解决</strong>：用「复制按钮」产生纯净字符串再粘贴；粘贴后按 <code>Home</code>/<code>End</code> 检查首尾有没有多余字符；不同输入框要求不同（购买框只填裸域名，地址栏才允许完整 URL）。</li><li><strong>教训</strong>：格式校验失败先怀疑&quot;看不见的字符&quot;，不要怀疑自己的输入法。</li></ul>
+<h3 id="坑-2-txt-记录提示-最快-30-分钟-一般-24-48-小时生效"><a class="anchor" href="#坑-2-txt-记录提示-最快-30-分钟-一般-24-48-小时生效">#</a>坑 2：TXT 记录提示&quot;最快 30 分钟、一般 24~48 小时生效&quot;</h3>
+<ul><li><strong>现象</strong>：保存 TXT 后腾讯云弹出大段免责声明，看着要等一两天。</li><li><strong>根因</strong>：这是运营商 DNS 缓存的最坏情况说明，纯免责声明。</li><li><strong>解决</strong>：不干等，直接主动探测：</li></ul>
+<p>  ```bash<br>  # 分别问阿里/腾讯/谷歌的公共 DNS<br>  nslookup -type=TXT edgeonereclaim.shaohua-lab.top 223.5.5.5<br>  nslookup -type=TXT edgeonereclaim.shaohua-lab.top 119.29.29.29<br>  nslookup -type=TXT edgeonereclaim.shaohua-lab.top 8.8.8.8<br>  ```<br>  实测保存后 <strong>1 分钟四个公共 DNS 全部返回</strong>，直接去点「验证」，秒过。</p>
+<ul><li><strong>教训</strong>：解析生效与否以&quot;公共 DNS 实际查询结果&quot;为准，别被页面文案吓住。</li></ul>
+<h3 id="坑-3-cname-记录值填错-本次最大的坑"><a class="anchor" href="#坑-3-cname-记录值填错-本次最大的坑">#</a>坑 3：CNAME 记录值填错 —— 本次最大的坑</h3>
+<ul><li><strong>现象</strong>：解析添加 <code>CNAME  @  →  pages.dnsoe5.com</code> 后，等了 5 分钟公共 DNS 仍然是 NXDOMAIN（域名不存在），网站完全打不开。</li><li><strong>根因</strong>：想当然地以为&quot;记录值要去掉自己域名前缀&quot;（常见 CDN 的惯性），但 EdgeOne Pages 的分配方式是<strong>每域名一条记录</strong>：</li><li>❌ <code>pages.dnsoe5.com</code> → 实测 NXDOMAIN（这个裸地址根本不存在）；</li><li>✅ <code>shaohua-lab.top.pages.dnsoe5.com</code> → 实测解析到 43.174.246.43 / 43.174.247.43。</li><li>控制台显示的 <code>shaohua-lab.top.pages.dnsoe5.com</code> 是<strong>要原样照抄的记录值</strong>，不是&quot;效果预览&quot;。</li><li><strong>解决</strong>：把记录值改成 EdgeOne 给的完整地址，几分钟后四大公共 DNS 全部生效。</li><li><strong>教训</strong>：<strong>&quot;填什么值&quot;以目标地址能不能解析为准绳</strong>——填之前先 <code>nslookup</code> 一下候选值，能解析到 IP 的那个才是对的。不要拿别家 CDN 的惯性套 EdgeOne。</li></ul>
+<h3 id="坑-4-部署后-时好时坏-10-次请求一半超时"><a class="anchor" href="#坑-4-部署后-时好时坏-10-次请求一半超时">#</a>坑 4：部署后&quot;时好时坏&quot;——10 次请求一半超时</h3>
+<ul><li><strong>现象</strong>：CNAME 生效后，连续请求有时 200、有时 000（连接超时），抓狂。</li><li><strong>根因</strong>：EdgeOne 域名配置是<strong>全球边缘节点逐台同步</strong>的。DNS 返回的两个节点（43.174.246.43 / 43.174.247.43）里，一个已就绪、一个还在同步，轮换到没就绪的节点就超时。</li><li><strong>解决</strong>：不 panic，等收敛（实测约 20 分钟）；用 <code>curl --resolve</code> 定向测试单节点确认&quot;哪个好了&quot;：</li></ul>
+<p>  ```bash<br>  curl -k --resolve shaohua-lab.top:443:43.174.247.43 https://shaohua-lab.top<br>  ```</p>
+<ul><li><strong>教训</strong>：全球 CDN 上线是<strong>非瞬时一致</strong>的，短时间&quot;时好时坏&quot;是正常过程，别误判成配置错误去改记录。</li></ul>
+<h3 id="坑-5-全设备弹-证书过期-不安全网站"><a class="anchor" href="#坑-5-全设备弹-证书过期-不安全网站">#</a>坑 5：全设备弹&quot;证书过期 / 不安全网站&quot;</h3>
+<ul><li><strong>现象</strong>：手机、电脑、平板都能打开页面，但全部弹证书警告；页面显示&quot;证书无效/过期/不安全&quot;（不同浏览器文案不同）。</li><li><strong>根因</strong>：<strong>能访问 ≠ 证书没问题</strong>。当时证书尚未签发，服务器下发的是腾讯的默认兜底证书 <code>CN=*.cdn.myqcloud.com</code>——证书和访问的域名不匹配，浏览器一律拦截。</li><li><strong>解决</strong>：</li></ul>
+<ol><li>EdgeOne 控制台 → 域名管理 → <strong>HTTPS 配置</strong>（初始状态&quot;未配置&quot;）；</li><li>点配置/申请 → 选<strong>免费 DV 证书（自动签发）</strong>——不要选付费的，也不要手动传证书文件；</li><li>几分钟后状态变「已生效」，浏览器警告自动消失（手机若还报，刷新或清一下站点数据）。</li></ol>
+<ul><li><strong>验证方法</strong>（抓取服务器真实下发的证书）：</li></ul>
+<p>  ```bash<br>  # 看 subject 是不是你的域名<br>  openssl s_client -connect shaohua-lab.top:443 -servername shaohua-lab.top<br>  # 或 PowerShell 抓 RemoteCertificate.Subject<br>  ```<br>  签发前 <code>CN=*.cdn.myqcloud.com</code>、签发后 <code>CN=shaohua-lab.top</code>（TrustAsia DV CA）。</p>
+<ul><li><strong>教训</strong>：<strong>证书和备案是两回事</strong>（见 2.3）——不用额外交钱、不用等审核，免费 DV 证书几分钟搞定，只是需要你去控制台点一下&quot;申请&quot;。</li></ul>
+<h3 id="坑-6-找不到-验证-按钮-控制台入口-404"><a class="anchor" href="#坑-6-找不到-验证-按钮-控制台入口-404">#</a>坑 6：找不到「验证」按钮 / 控制台入口 404</h3>
+<ul><li><strong>现象</strong>：归属权验证页面找不到&quot;验证&quot;按钮；后来连 <code>cloud.tencent.com/edgeone</code> 都打不开（404）。</li><li><strong>根因</strong>：</li><li>验证按钮在<strong>页面最底部</strong>（步骤 3 的正下方），不滚动看不到；</li><li><code>cloud.tencent.com/edgeone</code> 是<strong>产品介绍页</strong>，控制台是 <code>console.cloud.tencent.com/edgeone</code>——两者混淆；且控制台入口随版本更新位置会变（&quot;自定义域名&quot;可能在&quot;域名管理&quot;里）。</li><li><strong>解决</strong>：</li><li>找回入口第一招：<strong>浏览器历史记录</strong>搜 <code>edgeone</code>（你访问过，一定在记录里）；</li><li>标准入口：登录 console.cloud.tencent.com → 搜索&quot;EdgeOne&quot; → Pages → my-blog → 自定义域名/域名管理；</li><li>兜底：换浏览器 / 隐身窗口重试，排除缓存干扰。</li><li><strong>教训</strong>：控制台操作先认准&quot;console&quot;开头的地址；页面长时间找不到，用历史记录兜底。</li></ul>
+<h3 id="坑-7-本机-curl-报-could-not-resolve-host-但公共-dns-明明是好的"><a class="anchor" href="#坑-7-本机-curl-报-could-not-resolve-host-但公共-dns-明明是好的">#</a>坑 7：本机 curl 报 &quot;Could not resolve host&quot;，但公共 DNS 明明是好的</h3>
+<ul><li><strong>现象</strong>：公共 DNS（8.8.8.8 / 223.5.5.5）都已返回 IP，本机 curl 却解析失败；在改 CNAME 之前本地残留了旧结果。</li><li><strong>根因</strong>：<strong>Windows 本地 DNS 负缓存</strong>（NXDONMAIN 也会被缓存）。</li><li><strong>解决</strong>：</li></ul>
+<p>  ```bash<br>  ipconfig /flushdns<br>  ```</p>
+<ul><li><strong>教训</strong>：排查&quot;明明生效了却打不开&quot;时，先清本地缓存再测。</li></ul>
+<h2 id="六-费用总结与长期运维"><a class="anchor" href="#六-费用总结与长期运维">#</a>六、费用总结与长期运维</h2>
+<h3 id="6-1-花费清单"><a class="anchor" href="#6-1-花费清单">#</a>6.1 花费清单</h3>
+<table><thead><tr><th>项目</th><th>费用</th><th>说明</th></tr></thead><tbody><tr><td>域名 shaohua-lab.top</td><td>首年 14 元，续费约 34 元/年</td><td>唯一硬性开销</td></tr><tr><td>EdgeOne Pages 托管</td><td>免费</td><td>个人博客流量在免费额度内</td></tr><tr><td>SSL 证书</td><td>免费</td><td>EdgeOne 自动签发 DV 证书，到期自动续（本次签至 2026-12-01）</td></tr><tr><td>DNS 解析</td><td>免费</td><td>腾讯云自带</td></tr></tbody></table>
+<p><strong>结论：一年总成本约 14~34 元，性价比极高。</strong></p>
+<h3 id="6-2-日常维护流程-写文章-上线"><a class="anchor" href="#6-2-日常维护流程-写文章-上线">#</a>6.2 日常维护流程（写文章 → 上线）</h3>
+<pre class="code"><span class="lang-tag">bash</span><code class="lang-bash"># 1. 本地写文章：在 posts/ 新建 xxx.md（front matter 必填）
+# 2. 本地预览：node server.js → http://localhost:8766
+# 3. 静态化重建：
+node build-static.js      # 重新生成 dist/
+# 4. 重新打 zip（或用 dist/ 目录直接上传）
+# 5. EdgeOne Pages → my-blog → 上传新产物 → 部署</code></pre>
+<blockquote><p>部署是<strong>全量覆盖式</strong>的：每次上传整套 dist。文件名带版本号（css/js 已带 v3/v2）可避免浏览器缓存旧版。</p>
+</blockquote>
+<h3 id="6-3-备份与换机"><a class="anchor" href="#6-3-备份与换机">#</a>6.3 备份与换机</h3>
+<ul><li>一键打包：双击 <code>迁移打包.bat</code> → 生成「博客迁移包.zip」（含全部文章、知识库、脚本）；</li><li>换机三步：拷包 → 新机解压 → 装 Node 双击 <code>start-server.bat</code>；</li><li>部署相关凭证（腾讯云账号/实名模板）与代码分开保管。</li></ul>
+<h3 id="6-4-未来可选项"><a class="anchor" href="#6-4-未来可选项">#</a>6.4 未来可选项</h3>
+<ul><li><strong>www 前缀</strong>：在解析里加一条 <code>www  →  CNAME  →  同目标地址</code>，www 也能访问（EdgeOne 会给 www 同样签发证书）；</li><li><strong>更短域名</strong>：<code>.top</code> 首年促销常有，续费有波动，若以后预算上来了可考虑换 <code>.com</code>；</li><li><strong>大陆节点加速</strong>：若流量变大需要大陆节点专属能力，届时再评估 ICP 备案（见 2.3）。</li></ul>
+<h2 id="七-避坑速查表-一页版"><a class="anchor" href="#七-避坑速查表-一页版">#</a>七、避坑速查表（一页版）</h2>
+<table><thead><tr><th>现象</th><th>根因</th><th>一句解决</th></tr></thead><tbody><tr><td>提示&quot;请输入正确格式的域名&quot;</td><td>粘贴内容带隐形杂质/多前缀</td><td>干净字符串整串复制，检查首尾</td></tr><tr><td>TXT 提示 24~48 小时生效</td><td>免责声明</td><td>直接 nslookup 公共 DNS，1 分钟即生效</td></tr><tr><td>填了 CNAME 还是 NXDOMAIN</td><td>记录值少了域名前缀</td><td>整串照抄 EdgeOne 给的值，先 nslookup 验证</td></tr><tr><td>部署后时好时坏</td><td>边缘节点逐台同步</td><td>等 10~30 分钟收敛，定向 --resolve 验证</td></tr><tr><td>全设备证书警告</td><td>证书未签发，下发兜底证书</td><td>域名管理 → 申请免费 DV 证书（0 元）</td></tr><tr><td>找不到验证按钮/控制台</td><td>页面太长/产品页与控制台混淆</td><td>历史记录找回 + console 开头的地址</td></tr><tr><td>本地解析失败但线上正常</td><td>Windows DNS 负缓存</td><td>ipconfig /flushdns</td></tr></tbody></table>
+<h2 id="结语"><a class="anchor" href="#结语">#</a><span class="sec-num">八、</span>结语</h2>
+<p>从&quot;请输入正确格式的域名&quot;开始，到全球四个公共 DNS 全绿、双节点证书验证通过，前后经历：格式排查 → TXT 验证 → CNAME 纠偏 → 节点收敛 → 证书签发 → HSTS 加固。<strong>最贵的学费是 CNAME 那一下</strong>——永远用&quot;目标地址能不能解析&quot;来检验配置，而不是凭惯性猜。</p>
+<p>现在这台小站：每年 14~34 元的成本、免费证书自动续签、全球边缘节点加速，静静地服务着来查 STM32/ESP32 驱动资料的朋友们。希望这份实录让你的上线之路少绕几个弯。🛰️</p>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">九、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-09-02</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

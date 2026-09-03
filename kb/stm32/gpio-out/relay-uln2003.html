@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>继电器（ULN2003 驱动，2 路） · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="">文章</a>
+      <a href="/kb" class="on">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/kb">← 返回知识库</a>
+  <a class="" href="#元信息">一、元信息</a><a class="" href="#接线表">二、接线表</a><a class="" href="#踩坑清单">三、踩坑清单</a><a class="" href="#关键修复-2026-08-18-实测-上电误吸合-关不掉">四、关键修复（2026-08-18 实测：上电误吸合 + 关不掉）</a><a class="l2" href="#修复1-hal_mspinit-禁用-swj-后立即拉低-pa13-pa14">4.1 修复1：HAL_MspInit 禁用 SWJ 后立即拉低 PA13/PA14</a><a class="l2" href="#修复2-hse-起振失败回退-hsi">4.2 修复2：HSE 起振失败回退 HSI</a><a class="l2" href="#修复3-主循环按键双采样消抖">4.3 修复3：主循环按键双采样消抖</a><a class="" href="#驱动代码">五、驱动代码</a><a class="l2" href="#main-h-引脚-宏定义">5.1 main.h（引脚/宏定义）</a><a class="l2" href="#relay-h">5.2 relay.h</a><a class="l2" href="#relay-c">5.3 relay.c</a><a class="" href="#调用示例">六、调用示例</a><a class="" href="#参考库-链接">七、参考库/链接</a><a class="" href="#更新日志">八、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">stm32/gpio-out/relay-uln2003.md</div>
+    <h1 class="title">继电器（ULN2003 驱动，2 路）</h1>
+    <div class="meta-chips">
+      <span class="chip kb-tag">知识库 · STM32</span>
+      <span class="chip">📅 初版 2026-08-18</span>
+      <span class="chip upd">✏️ 更新于 2026-09-03</span>
+    </div>
+    <div class="prose"><h1 id="继电器（ULN2003-驱动，2-路）">继电器（ULN2003 驱动，2 路）</h1>
+<h2 id="元信息"><a class="anchor" href="#元信息">#</a><span class="sec-num">一、</span>元信息</h2>
+<table><thead><tr><th>字段</th><th>值</th></tr></thead><tbody><tr><td>芯片/平台</td><td>STM32F103C8T6（HAL）</td></tr><tr><td>接口类型</td><td>GPIO 推挽输出</td></tr><tr><td>验证状态</td><td>✅ 已验证</td></tr><tr><td>验证环境</td><td>Demo00 工程 / Keil MDK（AC5）/ 2026-08-18</td></tr><tr><td>驱动方式</td><td>HAL</td></tr></tbody></table>
+<h2 id="接线表"><a class="anchor" href="#接线表">#</a><span class="sec-num">二、</span>接线表</h2>
+<table><thead><tr><th>信号</th><th>MCU 引脚</th><th>模块引脚</th><th>备注</th></tr></thead><tbody><tr><td>继电器1</td><td><strong>PA14</strong></td><td>ULN2003 IN1 → 继电器线圈</td><td>高电平吸合（洋桃1号官方定义）</td></tr><tr><td>继电器2</td><td><strong>PA13</strong></td><td>ULN2003 IN2 → 继电器线圈</td><td>高电平吸合（洋桃1号官方定义）</td></tr><tr><td>指示LED1</td><td>PB0</td><td>板载LED</td><td>与继电器1联动（本工程附加）</td></tr><tr><td>指示LED2</td><td>PB1</td><td>板载LED</td><td>与继电器2联动（本工程附加）</td></tr></tbody></table>
+<blockquote><p>⚠️ <strong>引脚号极易写反</strong>：洋桃1号官方定义是 <strong>继电器1 = PA14，继电器2 = PA13</strong>，不是 PA13/PA14！写反表现为&quot;继电器2 上电就吸合&quot;或&quot;触摸 A 控制的是继电器2&quot;。</p>
+</blockquote>
+<h2 id="踩坑清单"><a class="anchor" href="#踩坑清单">#</a><span class="sec-num">三、</span>踩坑清单</h2>
+<ol><li><strong>CubeMX 的 HAL_MspInit 过早禁用 SWJ（本工程第二贵教训，2026-08-18 实测）</strong>：CubeMX 在 PA13/PA14 配置为 GPIO 输出时，会在 <code>HAL_MspInit()</code>（<code>HAL_Init()</code> 一开头就调用）里执行 <code>__HAL_AFIO_REMAP_SWJ_DISABLE()</code>——<strong>比 relay_init 早得多</strong>。</li></ol>
+<ul><li>后果：禁用 SWJ 后 <strong>PA13(SWDIO) 芯片内部固定上拉</strong>，此时引脚还是输入模式 → 输出高电平 → <strong>继电器在 SystemClock_Config 等待 HSE 起振期间（最长几百 ms）被强制吸合</strong>；若 HSE 起振失败（电源不稳）→ <code>Error_Handler()</code> 死循环 → <strong>继电器永远吸合、按键全部失效</strong>。现象：&quot;上电后继电器一直导通、按 B/D 关不掉、LED 变暗&quot;。</li><li>解法：在 <code>HAL_MspInit()</code> 的 <code>USER CODE BEGIN MspInit 1</code> 区域，禁用 SWJ 后<strong>立即</strong>把 PA13/PA14 配置为推挽输出并拉低（见下方&quot;关键修复&quot;）。</li><li>对比：官方标准库代码把&quot;禁 SWJ&quot;放在 <code>RELAY_Init()</code> 内且在 GPIO 配置<strong>之后</strong>，不存在此窗口。</li></ul>
+<ol><li><strong>HSE 起振失败会死锁，必须兜底</strong>：<code>SystemClock_Config()</code> 若 HSE 起振失败直接 <code>Error_Handler()</code>，程序死锁 → 继电器保持最后状态、按键失效。解法：HSE 失败时<strong>回退 HSI 8MHz 继续运行</strong>（见&quot;关键修复&quot;），保证继电器始终可控。</li><li><strong>SWJ 释放顺序必须对</strong>：PA13/PA14 默认是 SWDIO/SWCLK（SWD 调试功能），必须把 <code>AFIO-&gt;MAPR.SWJ_CFG</code> 置为 <code>100</code> 释放成 GPIO。</li></ol>
+<ul><li>❌ <strong>错误做法</strong>：在 GPIO 初始化<strong>之前</strong>调 <code>release_swd_pins()</code> —— 释放时引脚电平不受控（可能被内部上拉），上电瞬间继电器误动作。</li><li>✅ <strong>正确顺序</strong>（实测有效）：① 先配置 GPIO 为推挽输出 → ② 再禁用 SWJ → ③ 最后写低电平初始。HAL 写法 <code>__HAL_AFIO_REMAP_SWJ_DISABLE()</code>。</li></ul>
+<ol><li><strong>继电器 1/2 与 PA13/PA14 的对应关系</strong>：官方是 <code>RELAY1=GPIO_Pin_14</code>、<code>RELAY2=GPIO_Pin_13</code>。初始代码定义反了，导致&quot;继电器2上电就开&quot;的假象（其实是 PA14 被当成了 2 号）。</li><li><strong>禁用 SWJ 后 ST-Link/SWD 失效</strong>：PA13/PA14 不再有调试功能，之后只能用 CH340 串口（Boot0 拉高）下载 HEX；要恢复调试需按住 NRST 连接 ST-Link 并全片擦除。</li><li><strong>ULN2003 是反相达林顿</strong>：IN 高电平 → OUT 拉低，若继电器接在 OUT 与 VCC 之间则&quot;IN 高 = 线圈通电&quot;。带光耦/指示灯的模块还要注意极性。</li><li><strong>printf 卡死排查</strong>：程序里用了 <code>printf</code> 而 Keil <strong>未勾选 MicroLIB</strong> 时，独立运行（无调试器）会走 semihosting 触发 BKPT 卡死，主循环永远不执行，表现为&quot;继电器/触摸全没反应&quot;。排查外设&quot;不响应&quot;先确认主循环真的在跑（可先用纯 GPIO 点亮 LED 验证）。</li><li><strong>烧录旧 HEX 的坑</strong>：改完代码必须重新 F7 编译，确认 Build Output 0 Error、<code>Demo00.hex</code> 时间戳/大小有更新再烧。Keil 增量编译可能只更新部分 .o，建议改多文件时全量 rebuild。</li><li><strong>先用 LED 代替继电器验证控制链路</strong>：遇到继电器&quot;不响应&quot;时，先把输出换到普通 GPIO + LED，点亮 LED 验证 MCU 侧逻辑 OK，再切回继电器排查硬件（触点、供电、ULN2003 输入端）。</li><li><strong>供电不足会放大一切问题</strong>：继电器线圈吸合需几十 mA，若板子靠 ST-Link 3.3V（只有几十 mA）供电，吸合瞬间电压跌落 → LED 变暗、MCU 复位、触摸误触发。继电器最好独立 5V/12V 供电，ST-Link 只给 MCU。</li></ol>
+<h2 id="关键修复-2026-08-18-实测-上电误吸合-关不掉"><a class="anchor" href="#关键修复-2026-08-18-实测-上电误吸合-关不掉">#</a><span class="sec-num">四、</span>关键修复（2026-08-18 实测：上电误吸合 + 关不掉）</h2>
+<h3 id="修复1-hal_mspinit-禁用-swj-后立即拉低-pa13-pa14"><a class="anchor" href="#修复1-hal_mspinit-禁用-swj-后立即拉低-pa13-pa14">#</a><span class="sec-num">4.1 </span>修复1：HAL_MspInit 禁用 SWJ 后立即拉低 PA13/PA14</h3>
+<p><code>stm32f1xx_hal_msp.c</code>（CubeMX 生成，改动写在 USER CODE 区域内）：</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">void HAL_MspInit(void)
+{
+  __HAL_RCC_AFIO_CLK_ENABLE();
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  __HAL_AFIO_REMAP_SWJ_DISABLE();   /* CubeMX 生成的：一进 HAL_Init 就禁用 SWJ */
+
+  /* USER CODE BEGIN MspInit 1 */
+  /* 禁用SWJ后 PA13(SWDIO) 仍被内部上拉，必须立即配置为推挽输出并拉低，
+     否则继电器会在 SystemClock_Config 等待 HSE 起振期间误吸合 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &amp;GPIO_InitStruct);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13 | GPIO_PIN_14, GPIO_PIN_RESET);
+  /* USER CODE END MspInit 1 */
+}</code></pre>
+<h3 id="修复2-hse-起振失败回退-hsi"><a class="anchor" href="#修复2-hse-起振失败回退-hsi">#</a><span class="sec-num">4.2 </span>修复2：HSE 起振失败回退 HSI</h3>
+<p><code>SystemClock_Config()</code> 中，<code>HAL_RCC_OscConfig</code> 失败时不再直接 <code>Error_Handler()</code>，而是回退 HSI 8MHz 继续运行（代码见工程 main.c，结构：失败 → 配 HSI 无 PLL → <code>FLASH_LATENCY_0</code> → 继续跑）。</p>
+<h3 id="修复3-主循环按键双采样消抖"><a class="anchor" href="#修复3-主循环按键双采样消抖">#</a><span class="sec-num">4.3 </span>修复3：主循环按键双采样消抖</h3>
+<p>继电器吸合瞬间的电磁干扰可能让触摸误触发，主循环对每个按键<strong>连续两次采样（间隔 5ms）确认</strong>再动作（代码见工程 main.c）。</p>
+<h2 id="驱动代码"><a class="anchor" href="#驱动代码">#</a><span class="sec-num">五、</span>驱动代码</h2>
+<p>（Demo00 最终版，2026-08-18 实测：触摸 A/B/C/D 控制继电器1/2 吸合/断开，LED 联动）</p>
+<h3 id="main-h-引脚-宏定义"><a class="anchor" href="#main-h-引脚-宏定义">#</a><span class="sec-num">5.1 </span>main.h（引脚/宏定义）</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* CubeMX 生成区 */
+#define RELAY1_Pin GPIO_PIN_14
+#define RELAY1_GPIO_Port GPIOA
+#define RELAY2_Pin GPIO_PIN_13
+#define RELAY2_GPIO_Port GPIOA
+#define LED1_Pin GPIO_PIN_0
+#define LED1_GPIO_Port GPIOB
+#define LED2_Pin GPIO_PIN_1
+#define LED2_GPIO_Port GPIOB
+
+/* USER CODE BEGIN Private defines */
+typedef enum {
+    RELAY_ID_1 = 0,
+    RELAY_ID_2
+} Relay_ID_t;
+/* USER CODE END Private defines */</code></pre>
+<h3 id="relay-h"><a class="anchor" href="#relay-h">#</a><span class="sec-num">5.2 </span>relay.h</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#ifndef RELAY_H
+#define RELAY_H
+
+#include &quot;main.h&quot;
+
+void     relay_init(void);
+void     relay_on(Relay_ID_t id);
+void     relay_off(Relay_ID_t id);
+void     relay_toggle(Relay_ID_t id);
+uint8_t  relay_get_state(Relay_ID_t id);
+
+#endif /* RELAY_H */</code></pre>
+<h3 id="relay-c"><a class="anchor" href="#relay-c">#</a><span class="sec-num">5.3 </span>relay.c</h3>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &quot;relay.h&quot;
+
+static GPIO_TypeDef *relay_port[2] = {RELAY1_GPIO_Port, RELAY2_GPIO_Port};
+static const uint16_t relay_pin[2] = {RELAY1_Pin, RELAY2_Pin};
+
+void relay_init(void)
+{
+    GPIO_InitTypeDef g = {0};
+
+    /* 使能 GPIOA/GPIOB 和 AFIO 时钟 */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
+    /* 1a. 配置继电器引脚 PA13/PA14 推挽输出 */
+    g.Mode  = GPIO_MODE_OUTPUT_PP;
+    g.Pull  = GPIO_NOPULL;
+    g.Speed = GPIO_SPEED_FREQ_HIGH;
+    g.Pin   = RELAY1_Pin | RELAY2_Pin;
+    HAL_GPIO_Init(GPIOA, &amp;g);
+
+    /* 1b. 配置指示 LED 引脚 PB0/PB1 推挽输出 */
+    g.Speed = GPIO_SPEED_FREQ_LOW;
+    g.Pin   = LED1_Pin | LED2_Pin;
+    HAL_GPIO_Init(GPIOB, &amp;g);
+
+    /* 2. 禁用 JTAG+SWD，释放 PA13/PA14（必须在 GPIO 配置之后！） */
+    __HAL_AFIO_REMAP_SWJ_DISABLE();
+
+    /* 3. 拉低初始电平，继电器断开、LED 熄灭 */
+    HAL_GPIO_WritePin(RELAY1_GPIO_Port, RELAY1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RELAY2_GPIO_Port, RELAY2_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+}
+
+void relay_on(Relay_ID_t id)
+{
+    if (id &lt;= RELAY_ID_2)
+        HAL_GPIO_WritePin(relay_port[id], relay_pin[id], GPIO_PIN_SET);
+}
+
+void relay_off(Relay_ID_t id)
+{
+    if (id &lt;= RELAY_ID_2)
+        HAL_GPIO_WritePin(relay_port[id], relay_pin[id], GPIO_PIN_RESET);
+}
+
+void relay_toggle(Relay_ID_t id)
+{
+    if (id &lt;= RELAY_ID_2)
+        HAL_GPIO_TogglePin(relay_port[id], relay_pin[id]);
+}
+
+uint8_t relay_get_state(Relay_ID_t id)
+{
+    if (id &gt; RELAY_ID_2) return 0;
+    return (HAL_GPIO_ReadPin(relay_port[id], relay_pin[id]) == GPIO_PIN_SET) ? 1 : 0;
+}</code></pre>
+<h2 id="调用示例"><a class="anchor" href="#调用示例">#</a><span class="sec-num">六、</span>调用示例</h2>
+<p>（✅ 2026-08-18 最终验证版：触摸 A/B/C/D 控制继电器1/2 + LED1/2，带双采样消抖）</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">/* main() 初始化顺序 */
+HAL_Init();                 /* 内部 HAL_MspInit 已禁用SWJ并立即拉低PA13/14 */
+SystemClock_Config();       /* HSE 8MHz×9=72MHz，失败自动回退HSI */
+MX_GPIO_Init();
+MX_USART1_UART_Init();
+relay_init();               /* 继电器+LED初始化，默认断开/熄灭 */
+
+/* 主循环：触摸按键电平轮询，低有效，双采样消抖 */
+while (1)
+{
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_A_Pin) == GPIO_PIN_RESET)
+    {
+        HAL_Delay(5);   /* 消抖：间隔5ms后再确认一次 */
+        if (HAL_GPIO_ReadPin(GPIOA, KEY_A_Pin) == GPIO_PIN_RESET)
+        {
+            relay_on(RELAY_ID_1);                                 /* 触摸A → 继电器1吸合 */
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);   /* LED1 亮 */
+        }
+    }
+    if (HAL_GPIO_ReadPin(GPIOA, KEY_B_Pin) == GPIO_PIN_RESET)
+    {
+        HAL_Delay(5);
+        if (HAL_GPIO_ReadPin(GPIOA, KEY_B_Pin) == GPIO_PIN_RESET)
+        {
+            relay_off(RELAY_ID_1);                                /* 触摸B → 继电器1断开 */
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET); /* LED1 灭 */
+        }
+    }
+    /* C → RELAY_ID_2 吸合，D → RELAY_ID_2 断开，同理（均带双采样） */
+    HAL_Delay(5);
+}</code></pre>
+<h2 id="参考库-链接"><a class="anchor" href="#参考库-链接">#</a><span class="sec-num">七、</span>参考库/链接</h2>
+<ul><li>洋桃1号官方范例（本地）：<code>D:\学习资料\【用户资料】洋桃1号开发板(2)\B5-教学视频示例程序\1-2-22-按键控制继电器程序\</code>（标准库实现，<code>Hardware/RELAY/relay.c</code>、<code>relay.h</code>）</li><li>ST 官方 GPIO 例程：github.com/STMicroelectronics/STM32CubeF1（GPIO 部分）</li><li>引脚复用说明：STM32F103 参考手册 RM0008 第 8 章 GPIO、AFIO 重映射（SWJ_CFG）</li></ul>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">八、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-18</td><td><span class="ty ty-add">新增</span></td><td>首次建档</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（建档补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/kb">← 返回知识库</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

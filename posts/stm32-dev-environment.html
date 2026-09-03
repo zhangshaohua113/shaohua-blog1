@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STM32从零开始：开发环境搭建与第一个工程 · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="on">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="" href="#需要安装的软件">一、需要安装的软件</a><a class="" href="#用-cubemx-创建工程">二、用 CubeMX 创建工程</a><a class="" href="#第一个程序-点亮-led">三、第一个程序：点亮 LED</a><a class="" href="#常见坑与解决">四、常见坑与解决</a><a class="l2" href="#1-编译报错找不到器件">1. 编译报错找不到器件</a><a class="l2" href="#2-下载时报错-no-st-link-detected">2. 下载时报错 `No ST-LINK detected`</a><a class="l2" href="#3-下载成功但程序不运行">3. 下载成功但程序不运行</a><a class="l2" href="#4-串口打印乱码">4. 串口打印乱码</a><a class="" href="#进阶建议">五、进阶建议</a><a class="" href="#更新日志">六、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">posts/stm32-dev-environment.md</div>
+    <h1 class="title">STM32从零开始：开发环境搭建与第一个工程</h1>
+    <div class="meta-chips">
+      <div class="dates">
+        <div class="dt"><span>📅 发布日期</span><b>2026-08-31</b></div>
+        <div class="dt up"><span>✏️ 更新日期</span><b>2026-09-03</b></div>
+      </div>
+      <span class="chip">STM32</span>
+      <span class="chip">4 分钟阅读</span>
+      <span class="chip">#STM32</span><span class="chip">#Keil</span><span class="chip">#CubeMX</span>
+    </div>
+    <div class="prose"><h1 id="STM32从零开始：开发环境搭建与第一个工程">STM32从零开始：开发环境搭建与第一个工程</h1>
+<p>很多初学者卡在第一步：环境装了一整天，还是点不亮第一盏 LED。这篇文章把环境搭建和第一个工程的完整流程走一遍。</p>
+<h2 id="需要安装的软件"><a class="anchor" href="#需要安装的软件">#</a><span class="sec-num">一、</span>需要安装的软件</h2>
+<table><thead><tr><th>软件</th><th>作用</th><th>备注</th></tr></thead><tbody><tr><td>Keil MDK</td><td>编译 + 调试</td><td>主流 IDE，也可用 GCC + VSCode</td></tr><tr><td>STM32CubeMX</td><td>图形化配置外设</td><td>生成初始化代码</td></tr><tr><td>ST-Link 驱动</td><td>下载程序</td><td>或用 CH340 串口下载</td></tr><tr><td>串口助手</td><td>串口调试</td><td>任意一款即可</td></tr></tbody></table>
+<h2 id="用-cubemx-创建工程"><a class="anchor" href="#用-cubemx-创建工程">#</a><span class="sec-num">二、</span>用 CubeMX 创建工程</h2>
+<p>打开 STM32CubeMX，按以下步骤操作：</p>
+<ol><li><strong>File → New Project</strong>，在 MCU 选择器里输入芯片型号（例如 STM32F103C8T6）；</li><li>在左侧 <code>System Core → RCC</code>，把 HSE 设为 <code>Crystal/Ceramic Resonator</code>；</li><li>在 <code>System Core → SYS</code>，Debug 设为 <code>Serial Wire</code>（启用 SWD 调试）；</li><li>找到 PC13 引脚，选择 <code>GPIO_Output</code>（板载 LED）；</li><li>左侧 <code>Project Manager</code> 页，Toolchain 选 <code>MDK-ARM</code>；</li><li>点击 <strong>GENERATE CODE</strong>，生成后打开 Keil 工程。</li></ol>
+<h2 id="第一个程序-点亮-led"><a class="anchor" href="#第一个程序-点亮-led">#</a><span class="sec-num">三、</span>第一个程序：点亮 LED</h2>
+<p>在 <code>main.c</code> 的 <code>main()</code> 里加入：</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);</code></pre>
+<p>编译下载后，板载 LED 就亮了。如果想让它闪烁，用 HAL 延时：</p>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">while (1) {
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_Delay(500);
+}</code></pre>
+<h2 id="常见坑与解决"><a class="anchor" href="#常见坑与解决">#</a><span class="sec-num">四、</span>常见坑与解决</h2>
+<h3 id="1-编译报错找不到器件"><a class="anchor" href="#1-编译报错找不到器件">#</a>1. 编译报错找不到器件</h3>
+<p>Keil 里没有对应的 Device Pack。打开 <strong>Pack Installer</strong>，搜索你的芯片型号安装即可。</p>
+<h3 id="2-下载时报错-no-st-link-detected"><a class="anchor" href="#2-下载时报错-no-st-link-detected">#</a>2. 下载时报错 <code>No ST-LINK detected</code></h3>
+<ul><li>检查驱动是否安装；</li><li>检查 ST-Link 与板子的接线（SWDIO / SWCLK / GND / 3.3V）；</li><li>在 Keil 的 <code>Options → Debug</code> 里确认选择了 ST-Link 并点击 <strong>Settings</strong> 能看到目标芯片。</li></ul>
+<h3 id="3-下载成功但程序不运行"><a class="anchor" href="#3-下载成功但程序不运行">#</a>3. 下载成功但程序不运行</h3>
+<p>多半是 <strong>BOOT0 引脚</strong> 拉高了。把 BOOT0 接 GND 再复位一次。</p>
+<h3 id="4-串口打印乱码"><a class="anchor" href="#4-串口打印乱码">#</a>4. 串口打印乱码</h3>
+<ul><li>确认波特率与代码中 <code>HAL_UART_Transmit</code> 配置一致；</li><li>检查晶振配置：CubeMX 里 HSE 频率要和板子实际晶振一致（常见 8MHz）。</li></ul>
+<h2 id="进阶建议"><a class="anchor" href="#进阶建议">#</a><span class="sec-num">五、</span>进阶建议</h2>
+<p>点亮 LED 之后，建议依次挑战：按键中断、串口收发、定时器 PWM、I2C 驱动 OLED。每一步都是后面做项目的基石。</p>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">六、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-31</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

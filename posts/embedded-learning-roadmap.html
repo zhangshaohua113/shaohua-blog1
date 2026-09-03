@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嵌入式学习路线指南：从零基础到项目实战 · 韶华实验室</title>
+<meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
+<script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/style.css?v=4">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <nav class="nav-main">
+      <a href="/" class="">首页</a>
+      <a href="/#posts" class="on">文章</a>
+      <a href="/kb" class="">知识库</a>
+      <a href="/about" class="">关于</a>
+    </nav>
+    <div class="nav-side">
+      <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="切换深浅色" title="白天 / 夜晚模式">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main class="page kb-article">
+  <nav class="toc">
+  <div class="t-title">本页目录</div>
+  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="" href="#第一阶段-打好编程基础">一、第一阶段：打好编程基础</a><a class="l2" href="#c-语言-2-3-个月">1.1 C 语言（2~3 个月）</a><a class="" href="#第二阶段-单片机入门-2-3-个月">二、第二阶段：单片机入门（2~3 个月）</a><a class="" href="#第三阶段-rtos-1-2-个月">三、第三阶段：RTOS（1~2 个月）</a><a class="" href="#第四阶段-嵌入式-linux-2-4-个月">四、第四阶段：嵌入式 Linux（2~4 个月）</a><a class="" href="#第五阶段-项目实战">五、第五阶段：项目实战</a><a class="" href="#推荐学习资源">六、推荐学习资源</a><a class="" href="#写在最后">七、写在最后</a><a class="" href="#更新日志">八、更新日志</a>
+</nav>
+  <article class="article kb-article-body">
+    <div class="pathline">posts/embedded-learning-roadmap.md</div>
+    <h1 class="title">嵌入式学习路线指南：从零基础到项目实战</h1>
+    <div class="meta-chips">
+      <div class="dates">
+        <div class="dt"><span>📅 发布日期</span><b>2026-08-31</b></div>
+        <div class="dt up"><span>✏️ 更新日期</span><b>2026-09-03</b></div>
+      </div>
+      <span class="chip">学习路线</span>
+      <span class="chip">4 分钟阅读</span>
+      <span class="chip">#嵌入式</span><span class="chip">#STM32</span><span class="chip">#C语言</span>
+    </div>
+    <div class="prose"><h1 id="嵌入式学习路线指南：从零基础到项目实战">嵌入式学习路线指南：从零基础到项目实战</h1>
+<p>嵌入式开发门槛并不高，难的是信息太杂、路线不清晰。这篇文章基于我自己的学习经历，梳理一条从零到实战的路线。</p>
+<h2 id="第一阶段-打好编程基础"><a class="anchor" href="#第一阶段-打好编程基础">#</a><span class="sec-num">一、</span>第一阶段：打好编程基础</h2>
+<h3 id="c-语言-2-3-个月"><a class="anchor" href="#c-语言-2-3-个月">#</a><span class="sec-num">1.1 </span>C 语言（2~3 个月）</h3>
+<p>嵌入式开发 90% 的代码是 C 语言，以下知识点必须扎实：</p>
+<ul><li>指针与指针运算（嵌入式调试的灵魂）</li><li>结构体、联合体、位运算</li><li>函数指针与回调</li><li>内存管理（栈、堆、静态区）</li></ul>
+<pre class="code"><span class="lang-tag">c</span><code class="lang-c">#include &lt;stdio.h&gt;
+
+int main(void) {
+    int value = 0x12345678;
+    unsigned char *p = (unsigned char *)&amp;value;
+
+    for (int i = 0; i &lt; 4; i++) {
+        printf(&quot;byte[%d] = 0x%02x\n&quot;, i, p[i]);
+    }
+    return 0;
+}</code></pre>
+<p>用上面这个小程序理解大小端，比背概念管用得多。</p>
+<h2 id="第二阶段-单片机入门-2-3-个月"><a class="anchor" href="#第二阶段-单片机入门-2-3-个月">#</a><span class="sec-num">二、</span>第二阶段：单片机入门（2~3 个月）</h2>
+<p>推荐 <strong>51 单片机</strong> 或直接上 <strong>STM32</strong>：</p>
+<ul><li>点亮 LED，跑通编译、烧录、调试全流程</li><li>GPIO、串口、定时器、中断、I2C/SPI</li><li>用 OLED 屏做一个小仪表</li></ul>
+<p>一个不错的第一个项目：<strong>串口接收指令 + 控制 LED + 上报温度</strong>，麻雀虽小五脏俱全。</p>
+<h2 id="第三阶段-rtos-1-2-个月"><a class="anchor" href="#第三阶段-rtos-1-2-个月">#</a><span class="sec-num">三、</span>第三阶段：RTOS（1~2 个月）</h2>
+<p>裸机项目做到一定规模，就该接触实时操作系统了，首选 FreeRTOS：</p>
+<table><thead><tr><th>概念</th><th>一句话理解</th></tr></thead><tbody><tr><td>任务</td><td>每个 while 循环就是一个任务</td></tr><tr><td>信号量</td><td>任务间的&quot;排队叫号&quot;</td></tr><tr><td>消息队列</td><td>任务间传数据的管道</td></tr><tr><td>互斥锁</td><td>保护共享资源的门禁</td></tr></tbody></table>
+<p>记住一个原则：<strong>能用消息队列就别共享全局变量</strong>，能减少 80% 的难查 Bug。</p>
+<h2 id="第四阶段-嵌入式-linux-2-4-个月"><a class="anchor" href="#第四阶段-嵌入式-linux-2-4-个月">#</a><span class="sec-num">四、</span>第四阶段：嵌入式 Linux（2~4 个月）</h2>
+<p>嵌入式 Linux 是从单片机到高端设备的必经之路：</p>
+<ol><li>交叉编译工具链的安装与使用</li><li>U-Boot 编译与启动流程</li><li>内核裁剪与设备树</li><li>根文件系统构建（Buildroot / Yocto）</li><li>驱动开发入门：字符设备驱动 Hello World</li></ol>
+<h2 id="第五阶段-项目实战"><a class="anchor" href="#第五阶段-项目实战">#</a><span class="sec-num">五、</span>第五阶段：项目实战</h2>
+<p>学习路线的终点是项目。建议做这几个方向的项目：</p>
+<ul><li>智能家居：STM32 + WiFi 模块 + 云平台</li><li>手持仪器：传感器 + OLED + 按键交互</li><li>物联网网关：ESP32 + MQTT + 数据上报</li></ul>
+<h2 id="推荐学习资源"><a class="anchor" href="#推荐学习资源">#</a><span class="sec-num">六、</span>推荐学习资源</h2>
+<ul><li>正点原子 / 野火：STM32 入门视频与例程</li><li>《FreeRTOS 内核实现与应用开发实战指南》</li><li>韦东山：嵌入式 Linux 视频教程</li></ul>
+<h2 id="写在最后"><a class="anchor" href="#写在最后">#</a><span class="sec-num">七、</span>写在最后</h2>
+<p>嵌入式是一个<strong>重实践</strong>的领域，看 100 个小时视频不如自己焊一块板子、跑通一个中断。保持&quot;遇到问题先读手册、再查资料、最后问人&quot;的习惯，你一定能走通这条路。</p>
+<h2 id="更新日志"><a class="anchor" href="#更新日志">#</a><span class="sec-num">八、</span>更新日志</h2>
+<div class="changelog"><div class="cl-head"><span class="cl-ico">📝</span><span>共 2 条记录</span></div>
+<table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-08-31</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
+</div>
+</div>
+    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+  </article>
+</main>
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="social foot-social"><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
+    <p>韶华实验室 · 记录嵌入式、物联网与工具链的思考与踩坑</p>
+    <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
+  </div>
+</footer>
+<script src="/js/main.js?v=3"></script>
+</body>
+</html>

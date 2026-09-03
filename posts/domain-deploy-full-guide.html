@@ -7,17 +7,17 @@
 <meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
 <script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="../css/style.css?v=4">
 </head>
 <body>
 <header class="nav">
   <div class="nav-inner">
-    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <a class="brand" href="../index.html"><span class="brand-dot"></span>韶华实验室</a>
     <nav class="nav-main">
-      <a href="/" class="">首页</a>
-      <a href="/#posts" class="on">文章</a>
-      <a href="/kb" class="">知识库</a>
-      <a href="/about" class="">关于</a>
+      <a href="../index.html" class="">首页</a>
+      <a href="../index.html#posts" class="on">文章</a>
+      <a href="../kb/index.html" class="">知识库</a>
+      <a href="../about.html" class="">关于</a>
     </nav>
     <div class="nav-side">
       <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
@@ -30,7 +30,7 @@
 <main class="page kb-article">
   <nav class="toc">
   <div class="t-title">本页目录</div>
-  <a class="toc-back" href="/#posts">← 返回文章列表</a>
+  <a class="toc-back" href="../index.html#posts">← 返回文章列表</a>
   <a class="" href="#一-整体架构与路线图">一、整体架构与路线图</a><a class="" href="#二-域名选购-后缀怎么选才划算">二、域名选购：后缀怎么选才划算</a><a class="l2" href="#2-1-候选后缀对比-2026-年行情-人民币">2.1 候选后缀对比（2026 年行情，人民币）</a><a class="l2" href="#2-2-本次选购实录">2.2 本次选购实录</a><a class="l2" href="#2-3-备案到底要不要">2.3 备案到底要不要？</a><a class="" href="#三-edgeone-pages-部署-线上版第一站">三、EdgeOne Pages 部署（线上版第一站）</a><a class="" href="#四-绑定自定义域名全流程-核心">四、绑定自定义域名全流程（核心）</a><a class="l2" href="#第-1-步-添加自定义域名">第 1 步：添加自定义域名</a><a class="l2" href="#第-2-步-归属权验证-txt-记录">第 2 步：归属权验证（TXT 记录）</a><a class="l2" href="#第-3-步-添加-cname-记录-本次最大坑-见坑-3">第 3 步：添加 CNAME 记录（本次最大坑，见坑 3）</a><a class="l2" href="#第-4-步-等待边缘节点同步-签发证书">第 4 步：等待边缘节点同步 + 签发证书</a><a class="l2" href="#第-5-步-开启三个安全开关-建议全开">第 5 步：开启三个安全开关（建议全开）</a><a class="l2" href="#完成标准-自查清单">完成标准（自查清单）</a><a class="" href="#五-踩坑全记录-按发生顺序">五、踩坑全记录（按发生顺序）</a><a class="l2" href="#坑-1-一直提示-请输入正确格式的域名">坑 1：一直提示「请输入正确格式的域名」</a><a class="l2" href="#坑-2-txt-记录提示-最快-30-分钟-一般-24-48-小时生效">坑 2：TXT 记录提示&quot;最快 30 分钟、一般 24~48 小时生效&quot;</a><a class="l2" href="#坑-3-cname-记录值填错-本次最大的坑">坑 3：CNAME 记录值填错 —— 本次最大的坑</a><a class="l2" href="#坑-4-部署后-时好时坏-10-次请求一半超时">坑 4：部署后&quot;时好时坏&quot;——10 次请求一半超时</a><a class="l2" href="#坑-5-全设备弹-证书过期-不安全网站">坑 5：全设备弹&quot;证书过期 / 不安全网站&quot;</a><a class="l2" href="#坑-6-找不到-验证-按钮-控制台入口-404">坑 6：找不到「验证」按钮 / 控制台入口 404</a><a class="l2" href="#坑-7-本机-curl-报-could-not-resolve-host-但公共-dns-明明是好的">坑 7：本机 curl 报 &quot;Could not resolve host&quot;，但公共 DNS 明明是好的</a><a class="" href="#六-费用总结与长期运维">六、费用总结与长期运维</a><a class="l2" href="#6-1-花费清单">6.1 花费清单</a><a class="l2" href="#6-2-日常维护流程-写文章-上线">6.2 日常维护流程（写文章 → 上线）</a><a class="l2" href="#6-3-备份与换机">6.3 备份与换机</a><a class="l2" href="#6-4-未来可选项">6.4 未来可选项</a><a class="" href="#七-避坑速查表-一页版">七、避坑速查表（一页版）</a><a class="" href="#结语">八、结语</a><a class="" href="#更新日志">九、更新日志</a>
 </nav>
   <article class="article kb-article-body">
@@ -140,7 +140,7 @@ node build-static.js      # 重新生成 dist/
 <table><thead><tr><th>日期</th><th>类型</th><th>更新内容</th></tr></thead><tbody><tr><td class="cl-date">2026-09-02</td><td><span class="ty ty-add">新增</span></td><td>首次发布</td></tr><tr><td class="cl-date">2026-09-03</td><td><span class="ty ty-add">新增</span></td><td>文末新增「更新日志」记录区（首次发布补记）</td></tr></tbody></table>
 </div>
 </div>
-    <nav class="pager"><a href="/#posts">← 返回文章列表</a><a href="/">首页</a></nav>
+    <nav class="pager"><a href="../index.html#posts">← 返回文章列表</a><a href="../index.html">首页</a></nav>
   </article>
 </main>
 <footer class="foot">
@@ -150,6 +150,6 @@ node build-static.js      # 重新生成 dist/
     <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
   </div>
 </footer>
-<script src="/js/main.js?v=3"></script>
+<script src="../js/main.js?v=3"></script>
 </body>
 </html>

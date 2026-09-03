@@ -32,7 +32,7 @@
   /* ============ 首页文章计数 ============ */
   var countEl = document.getElementById('postCount');
   if (countEl) {
-    fetch('/api/posts.json', { headers: { Accept: 'application/json' } })
+    fetch('api/posts.json', { headers: { Accept: 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function (list) { countEl.textContent = '共 ' + list.length + ' 篇文章 · 1 个知识库'; })
       .catch(function () { /* 静默 */ });

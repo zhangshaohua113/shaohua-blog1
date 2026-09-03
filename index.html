@@ -7,17 +7,17 @@
 <meta name="description" content="记录嵌入式、物联网与工具链的思考与踩坑">
 <script>try{var t=localStorage.getItem('shaohua-theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236c8cff'/%3E%3Cstop offset='1' stop-color='%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%230d1326'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='url(%23g)' font-family='serif'%3E%E7%8F%A0%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <header class="nav">
   <div class="nav-inner">
-    <a class="brand" href="/"><span class="brand-dot"></span>韶华实验室</a>
+    <a class="brand" href="index.html"><span class="brand-dot"></span>韶华实验室</a>
     <nav class="nav-main">
-      <a href="/" class="on">首页</a>
-      <a href="/#posts" class="">文章</a>
-      <a href="/kb" class="">知识库</a>
-      <a href="/about" class="">关于</a>
+      <a href="index.html" class="on">首页</a>
+      <a href="index.html#posts" class="">文章</a>
+      <a href="kb/index.html" class="">知识库</a>
+      <a href="about.html" class="">关于</a>
     </nav>
     <div class="nav-side">
       <div class="social "><a href="https://space.bilibili.com" target="_blank" rel="noopener" title="B站">B站</a><a href="https://github.com" target="_blank" rel="noopener" title="GitHub">GitHub</a><a href="https://blog.csdn.net" target="_blank" rel="noopener" title="CSDN">CSDN</a></div>
@@ -38,49 +38,49 @@
   </section>
   <section class="wrap" id="posts">
     <div class="sec-head"><h2>全部内容</h2><span class="dim" id="postCount"></span></div>
-    <div class="grid" id="grid"><a class="card" href="/posts/domain-deploy-full-guide">
+    <div class="grid" id="grid"><a class="card" href="posts/domain-deploy-full-guide.html">
   <div class="card-meta"><span class="tag">博客</span><div class="card-dates"><time datetime="2026-09-02">📅 发布日期 2026-09-02</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>博客域名部署全流程实录：从本地到全球可访问（含全部踩坑）</h3>
   <p>从 0 到 https://shaohua-lab.top 全球可访问的完整实录：域名选购性价比、EdgeOne Pages 部署、TXT 归属验证、CNAME 大坑、证书签发，含全部踩坑记录与长期运维指南。</p>
   <div class="card-foot"><span>24 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/npm-broken-cli-fix">
+<a class="card" href="posts/npm-broken-cli-fix.html">
   <div class="card-meta"><span class="tag">工具链</span><div class="card-dates"><time datetime="2026-09-01">📅 发布日期 2026-09-01</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>npm 全局包救活记：opencode 崩溃 3 小时复盘</h3>
   <p>opencode 突然无法启动，命令找不到、二进制被系统拒绝。这篇记录完整的排查思路与自愈命令——下次 10 分钟搞定。</p>
   <div class="card-foot"><span>4 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/dsh-vs-opencode-co-dev">
+<a class="card" href="posts/dsh-vs-opencode-co-dev.html">
   <div class="card-meta"><span class="tag">随笔</span><div class="card-dates"><time datetime="2026-09-01">📅 发布日期 2026-09-01</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>同场竞技：DSH 与 opencode 一起写博客的那晚</h3>
   <p>两个 AI 同时开工：一个完成了任务，另一个卡在第一步反复重试、暂停还失效。这篇复盘那晚发生了什么，以及我们能从中学会什么。</p>
   <div class="card-foot"><span>4 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/stm32-dev-environment">
+<a class="card" href="posts/stm32-dev-environment.html">
   <div class="card-meta"><span class="tag">STM32</span><div class="card-dates"><time datetime="2026-08-31">📅 发布日期 2026-08-31</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>STM32从零开始：开发环境搭建与第一个工程</h3>
   <p>点不亮第一盏 LED 是很多人的第一个坎。这篇文章把环境搭建和第一个工程的完整流程走一遍。</p>
   <div class="card-foot"><span>4 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/esp32-wifi-iot-project">
+<a class="card" href="posts/esp32-wifi-iot-project.html">
   <div class="card-meta"><span class="tag">ESP32</span><div class="card-dates"><time datetime="2026-08-31">📅 发布日期 2026-08-31</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>ESP32开发实战：WiFi物联网温湿度监控</h3>
   <p>用 ESP32 + DHT11 做一个能联网上报温湿度的监控节点：硬件接线、传感器驱动、WiFi 连接、MQTT 上报全流程。</p>
   <div class="card-foot"><span>6 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/embedded-learning-roadmap">
+<a class="card" href="posts/embedded-learning-roadmap.html">
   <div class="card-meta"><span class="tag">学习路线</span><div class="card-dates"><time datetime="2026-08-31">📅 发布日期 2026-08-31</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>嵌入式学习路线指南：从零基础到项目实战</h3>
   <p>信息太杂、路线不清是嵌入式入门最大的坎。这篇基于真实学习经历，梳理从零基础到项目实战的完整路线。</p>
   <div class="card-foot"><span>4 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card" href="/posts/build-pure-frontend-blog">
+<a class="card" href="posts/build-pure-frontend-blog.html">
   <div class="card-meta"><span class="tag">建站</span><div class="card-dates"><time datetime="2026-08-31">📅 发布日期 2026-08-31</time><time class="up">✏️ 更新日期 2026-09-03</time></div></div>
   <h3>纯前端博客搭建教程：HTML + Markdown + GitHub Pages</h3>
   <p>手把手教你用纯静态站点 + 免费静态托管搭建个人博客，对比常见方案并给出完整架构与部署流程。</p>
   <div class="card-foot"><span>5 分钟阅读</span><span class="go">阅读 →</span></div>
 </a>
-<a class="card kb-card" href="/kb" title="嵌入式驱动知识库">
+<a class="card kb-card" href="kb/index.html" title="嵌入式驱动知识库">
   <div class="card-meta"><span class="tag kb-tag">知识库</span><div class="card-dates"><span class="kb-status online">15 篇档案 · 随站打包</span><span class="kb-status online">✏️ 最近更新 2026-09-03</span></div></div>
   <h3>嵌入式驱动知识库</h3>
   <p>stm32 / esp32 / linux 驱动档案：寄存器手册、踩坑笔记、可复用方案，内置随站离线可用。</p>
@@ -95,6 +95,6 @@
     <p class="dim">零依赖 Node.js 服务端渲染 · Powered by DeepSeek（DSH）与 opencode 协作 · © <span id="year"></span></p>
   </div>
 </footer>
-<script src="/js/main.js?v=3"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>
